@@ -12,18 +12,17 @@ const Landing = () => {
 			width={"full"}
 			maxW={"600px"}
 			mx={"auto"}
-			height={"100vh"}
+			h={"100vh"}
 			bg={"#242424"}
 		>
-			<VStack
-				width={"full"}
-				gap={"40px"}
-				pt={"40px"}
-				px={"10px"}
-				justifyContent={"center"}
-			>
+			<VStack width={"full"} gap={"20px"} p={"10px"} justifyContent={"center"}>
 				<Image src={Bet9jaLogo} />
-				<Text fontSize={"16px"} color={"#fff"} fontWeight={"500"}>
+				<Text
+					fontSize={"16px"}
+					color={"#fff"}
+					fontWeight={"500"}
+					textAlign={"center"}
+				>
 					Instant and secure way to topup your Bet9ja account.
 				</Text>
 				<HStack
@@ -61,11 +60,18 @@ const Landing = () => {
 					Bet9ja Topup
 				</Button>
 			</VStack>
-			<VStack width={"full"} backgroundImage={`url(${dottedBg})`} p={0}>
-				<Image src={groupRight} position={"absolute"} bottom={0} />
-				<Image src={groupLeft} position={"absolute"} bottom={0} />
-				<Image src={isolatedRight} position={"absolute"} bottom={-1} />
-				<Image src={dottedBg} position={"absolute"} bottom={0} />
+			<VStack
+				width={"full"}
+				backgroundImage={`url(${dottedBg})`}
+				position={"relative"}
+				backgroundSize={"cover"}
+				boxSize={"fit-content"}
+				p={0}
+			>
+				<Image src={groupRight} position={"fixed"} bottom={0} />
+				<Image src={groupLeft} position={"fixed"} bottom={0} />
+				<Image src={isolatedRight} position={"fixed"} bottom={-1} />
+				<Image src={dottedBg} position={"fixed"} bottom={0} />
 			</VStack>
 		</VStack>
 	);
