@@ -15,65 +15,109 @@ import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 
+// Manifest should be a JSON object directly, not a URL
+const manifestConfiguration = {
+	app: {
+		name: "Bet9ja TON TopUp",
+		icon: "https://your-app-url.com/icon.png",
+	},
+	manifestUrl: "https://your-app-url.com/tonconnect-manifest.json",
+};
+
 const Landing = () => {
-	const tg = window.Telegram?.WebApp;
 	const toast = useToast();
+	const [tg, setTg] = useState(null);
 	const [connector, setConnector] = useState(null);
 	const [walletAddress, setWalletAddress] = useState("");
 	const [isConnecting, setIsConnecting] = useState(false);
 
+	// Initialize Telegram WebApp
 	useEffect(() => {
-		// Initialize Telegram WebApp
-		if (tg) {
-			tg.expand();
-			if (tg.colorScheme === "dark") {
-				// Dark theme logic if needed
+		if (window.Telegram?.WebApp) {
+			const tgApp = window.Telegram.WebApp;
+			setTg(tgApp);
+			tgApp.ready();
+			tgApp.expand();
+		}
+	}, []);
+
+	// Initialize TON Connect
+	useEffect(() => {
+		const connector = new TonConnect(manifestConfiguration);
+		setConnector(connector);
+
+		// Check if wallet is already connected
+		const loadWallet = async () => {
+			const walletConnectionSource =
+				await connector.getWalletConnectionSource();
+			console.log("Wallet connection source:", walletConnectionSource);
+
+			const walletInfo = await connector.wallet;
+			if (walletInfo) {
+				setWalletAddress(walletInfo.account.address);
+				console.log("Connected wallet:", walletInfo);
 			}
-		}
+		};
 
-		// Initialize TonConnector
-		const initConnector = new TonConnect({
-			manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json", // Replace with your manifest URL
+		loadWallet();
+
+		// Subscribe to wallet changes
+		const unsubscribe = connector.onStatusChange((wallet) => {
+			if (wallet) {
+				setWalletAddress(wallet.account.address);
+				toast({
+					title: "Wallet Connected",
+					description: "Successfully connected to TON wallet",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+			} else {
+				setWalletAddress("");
+			}
 		});
-		setConnector(initConnector);
 
-		// Listen for wallet connection events
-		if (initConnector) {
-			initConnector.onStatusChange((wallet) => {
-				if (wallet) {
-					setWalletAddress(wallet.account.address);
-					toast({
-						title: "Wallet Connected",
-						description: "Successfully connected to TON wallet",
-						status: "success",
-						duration: 3000,
-						isClosable: true,
-					});
-				} else {
-					setWalletAddress("");
-				}
-			});
-		}
+		// Cleanup subscription
+		return () => {
+			unsubscribe();
+		};
 	}, []);
 
 	const handleWalletConnect = async () => {
 		try {
 			setIsConnecting(true);
+
 			if (!connector) {
-				throw new Error("Connector not initialized");
+				throw new Error("Wallet connector not initialized");
 			}
 
-			// Generate connection link
-			const universalLink = connector.connect();
+			// Get available wallets
+			const wallets = await connector.getWallets();
 
-			// Open TON Wallet
+			// For Telegram, we'll prioritize the TON Wallet
+			const tonWallet = wallets.find((wallet) =>
+				wallet.name.toLowerCase().includes("ton")
+			);
+
+			if (!tonWallet) {
+				throw new Error("TON Wallet not found");
+			}
+
+			// Generate universal link
+			const universalLink = connector.connect({
+				universalUrl: tonWallet.universalUrl,
+				bridgeUrl: tonWallet.bridgeUrl,
+			});
+
 			if (tg?.openTonWallet) {
+				// Use Telegram's native TON wallet if available
 				await tg.openTonWallet();
 			} else {
-				// Fallback for desktop or when TON Wallet is not available
+				// Fallback to universal link
 				window.open(universalLink, "_blank");
 			}
 		} catch (error) {
+			console.error("Wallet connection error:", error);
 			toast({
 				title: "Connection Error",
 				description: error.message || "Failed to connect wallet",
@@ -97,6 +141,7 @@ const Landing = () => {
 				isClosable: true,
 			});
 		} catch (error) {
+			console.error("Wallet disconnection error:", error);
 			toast({
 				title: "Disconnect Error",
 				description: error.message,
@@ -107,6 +152,7 @@ const Landing = () => {
 		}
 	};
 
+	// Rest of the JSX remains the same
 	return (
 		<VStack
 			width="full"
