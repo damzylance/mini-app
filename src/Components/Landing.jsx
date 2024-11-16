@@ -15,10 +15,10 @@ import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 
-const manifestConfiguration = {
-	manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
-	checkNetworkId: false, // Set this to true if you want to check network ID
-};
+// const manifestConfiguration = {
+// 	manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
+// 	checkNetworkId: false, // Set this to true if you want to check network ID
+// };
 
 const Landing = () => {
 	const toast = useToast();
@@ -39,7 +39,9 @@ const Landing = () => {
 
 	// Initialize TON Connect
 	useEffect(() => {
-		const connector = new TonConnect(manifestConfiguration);
+		const connector = new TonConnect({
+			manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
+		});
 		setConnector(connector);
 
 		// Check if wallet is already connected
@@ -83,6 +85,10 @@ const Landing = () => {
 	}, []);
 
 	const handleWalletConnect = async () => {
+		const walletConnectionSource = {
+			universalLink: "https://app.tonkeeper.com/ton-connect",
+			bridgeUrl: "https://bridge.tonapi.io/bridge",
+		};
 		try {
 			setIsConnecting(true);
 
@@ -95,8 +101,8 @@ const Landing = () => {
 				await tg.openTonWallet();
 			} else {
 				// Generate connection link for desktop or other wallets
-				const walletConnectionSource = await connector.connect();
-				window.open(walletConnectionSource.universal_url, "_blank");
+				const universalLink = await connector.connect(walletConnectionSource);
+				// window.open(walletConnectionSource.universal_url, "_blank");
 			}
 		} catch (error) {
 			console.error("Wallet connection error:", error);
