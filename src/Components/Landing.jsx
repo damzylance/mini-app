@@ -1,5 +1,14 @@
-import { Button, HStack, Image, Select, Text, VStack } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import {
+	Button,
+	HStack,
+	Image,
+	Select,
+	Text,
+	VStack,
+	useToast,
+} from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { TonConnect } from "@tonconnect/sdk";
 import Bet9jaLogo from "../assets/images/Bet9jaLogo.png";
 import dottedBg from "../assets/images/dottedBg.png";
 import isolatedRight from "../assets/images/Isolation_Mode.png";
@@ -8,25 +17,95 @@ import groupRight from "../assets/images/group_right.png";
 
 const Landing = () => {
 	const tg = window.Telegram?.WebApp;
+	const toast = useToast();
+	const [connector, setConnector] = useState(null);
+	const [walletAddress, setWalletAddress] = useState("");
+	const [isConnecting, setIsConnecting] = useState(false);
 
 	useEffect(() => {
 		// Initialize Telegram WebApp
 		if (tg) {
-			// Expand to full height
 			tg.expand();
-
-			// Set theme based on Telegram theme
 			if (tg.colorScheme === "dark") {
-				// Your dark theme logic if needed
+				// Dark theme logic if needed
 			}
+		}
 
-			// Set the main button if needed
-			tg.MainButton.setParams({
-				text: "PROCEED TO TOPUP",
-				color: "#0D7B3C",
+		// Initialize TonConnector
+		const initConnector = new TonConnect({
+			manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json", // Replace with your manifest URL
+		});
+		setConnector(initConnector);
+
+		// Listen for wallet connection events
+		if (initConnector) {
+			initConnector.onStatusChange((wallet) => {
+				if (wallet) {
+					setWalletAddress(wallet.account.address);
+					toast({
+						title: "Wallet Connected",
+						description: "Successfully connected to TON wallet",
+						status: "success",
+						duration: 3000,
+						isClosable: true,
+					});
+				} else {
+					setWalletAddress("");
+				}
 			});
 		}
 	}, []);
+
+	const handleWalletConnect = async () => {
+		try {
+			setIsConnecting(true);
+			if (!connector) {
+				throw new Error("Connector not initialized");
+			}
+
+			// Generate connection link
+			const universalLink = connector.connect();
+
+			// Open TON Wallet
+			if (tg?.openTonWallet) {
+				await tg.openTonWallet();
+			} else {
+				// Fallback for desktop or when TON Wallet is not available
+				window.open(universalLink, "_blank");
+			}
+		} catch (error) {
+			toast({
+				title: "Connection Error",
+				description: error.message || "Failed to connect wallet",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+		} finally {
+			setIsConnecting(false);
+		}
+	};
+
+	const handleDisconnect = async () => {
+		try {
+			await connector?.disconnect();
+			setWalletAddress("");
+			toast({
+				title: "Wallet Disconnected",
+				status: "info",
+				duration: 3000,
+				isClosable: true,
+			});
+		} catch (error) {
+			toast({
+				title: "Disconnect Error",
+				description: error.message,
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+		}
+	};
 
 	return (
 		<VStack
@@ -46,11 +125,7 @@ const Landing = () => {
 				justifyContent="center"
 				zIndex={1}
 			>
-				<Image
-					src={Bet9jaLogo}
-					alt="Bet9ja Logo"
-					loading="eager" // Prioritize logo loading
-				/>
+				<Image src={Bet9jaLogo} alt="Bet9ja Logo" loading="eager" />
 
 				<Text fontSize="16px" color="white" fontWeight="500" textAlign="center">
 					Instant and secure way to topup your Bet9ja account.
@@ -87,6 +162,26 @@ const Landing = () => {
 					</HStack>
 				</HStack>
 
+				{/* Wallet Connect Button */}
+				<Button
+					width="full"
+					py="30px"
+					size="lg"
+					bg={walletAddress ? "#444" : "#0D7B3C"}
+					color="white"
+					_hover={{ bg: walletAddress ? "#555" : "#0D7B3C" }}
+					onClick={walletAddress ? handleDisconnect : handleWalletConnect}
+					isLoading={isConnecting}
+					loadingText="Connecting..."
+				>
+					{walletAddress
+						? `Disconnect Wallet (${walletAddress.slice(
+								0,
+								6
+						  )}...${walletAddress.slice(-4)})`
+						: "Connect TON Wallet"}
+				</Button>
+
 				<Button
 					width="full"
 					py="30px"
@@ -94,18 +189,13 @@ const Landing = () => {
 					bg="#0D7B3C"
 					color="white"
 					_hover={{ bg: "#0D7B3C" }}
-					onClick={() => {
-						// Handle button click
-						if (tg?.MainButton) {
-							tg.MainButton.show();
-						}
-					}}
+					isDisabled={!walletAddress}
 				>
 					Bet9ja Topup
 				</Button>
 			</VStack>
 
-			{/* Background Images - Optimized loading */}
+			{/* Background Images */}
 			<Image
 				src={groupRight}
 				position="absolute"
