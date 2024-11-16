@@ -68,10 +68,10 @@ const Landing = () => {
 				position={"relative"}
 				p={0}
 			>
-				<Image src={groupRight} position={"fixed"} bottom={0} />
-				<Image src={groupLeft} position={"fixed"} bottom={0} />
-				<Image src={isolatedRight} position={"fixed"} bottom={-1} />
-				<Image src={dottedBg} position={"fixed"} bottom={0} />
+				<Image src={groupRight} position={"absolute"} bottom={0} />
+				<Image src={groupLeft} position={"absolute"} bottom={0} />
+				<Image src={isolatedRight} position={"absolute"} bottom={-1} />
+				<Image src={dottedBg} position={"absolute"} bottom={0} />
 			</VStack>
 		</VStack>
 	);
