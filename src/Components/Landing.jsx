@@ -12,15 +12,13 @@ const Landing = () => {
 			width={"full"}
 			maxW={"600px"}
 			mx={"auto"}
-			h={"100vh"}
+			height={"100vh"}
 			bg={"#242424"}
-			spacing={0}
 		>
-			{/* Top Section */}
 			<VStack
 				width={"full"}
 				gap={"40px"}
-				height={"50%"}
+				pt={"40px"}
 				px={"10px"}
 				justifyContent={"center"}
 			>
@@ -33,7 +31,7 @@ const Landing = () => {
 					color={"#fff"}
 					width={"full"}
 					justifyContent={"space-between"}
-					border={"1px solid #07940A"}
+					border={"1px solid #07940A "}
 					padding={"10px 20px"}
 					borderRadius={"12px"}
 				>
@@ -63,41 +61,11 @@ const Landing = () => {
 					Bet9ja Topup
 				</Button>
 			</VStack>
-
-			{/* Bottom Section with overlapping images */}
-			<VStack width={"full"} height={"50%"} position={"relative"} p={0}>
-				<Image
-					src={dottedBg}
-					position={"absolute"}
-					bottom={0}
-					left={0}
-					width={"full"}
-					height={"full"}
-					objectFit={"cover"}
-				/>
-				<Image
-					src={groupLeft}
-					position={"absolute"}
-					bottom={0}
-					left={0}
-					height={"auto"}
-				/>
-				<Image
-					src={groupRight}
-					position={"absolute"}
-					bottom={0}
-					right={0}
-					height={"auto"}
-				/>
-				<Image
-					src={isolatedRight}
-					position={"absolute"}
-					bottom={-1}
-					left={"50%"}
-					transform={"translateX(-50%)"}
-					height={"auto"}
-					zIndex={1}
-				/>
+			<VStack width={"full"} backgroundImage={`url(${dottedBg})`} p={0}>
+				<Image src={groupRight} position={"absolute"} bottom={0} />
+				<Image src={groupLeft} position={"absolute"} bottom={0} />
+				<Image src={isolatedRight} position={"absolute"} bottom={-1} />
+				<Image src={dottedBg} position={"absolute"} bottom={0} />
 			</VStack>
 		</VStack>
 	);
