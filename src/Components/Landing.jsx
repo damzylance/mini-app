@@ -15,13 +15,9 @@ import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 
-// Manifest should be a JSON object directly, not a URL
 const manifestConfiguration = {
-	app: {
-		name: "Bet9ja TON TopUp",
-		icon: "https://your-app-url.com/icon.png",
-	},
-	manifestUrl: "https://your-app-url.com/tonconnect-manifest.json",
+	manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
+	checkNetworkId: false, // Set this to true if you want to check network ID
 };
 
 const Landing = () => {
@@ -48,21 +44,24 @@ const Landing = () => {
 
 		// Check if wallet is already connected
 		const loadWallet = async () => {
-			const walletConnectionSource =
-				await connector.getWalletConnectionSource();
-			console.log("Wallet connection source:", walletConnectionSource);
-
-			const walletInfo = await connector.wallet;
-			if (walletInfo) {
-				setWalletAddress(walletInfo.account.address);
-				console.log("Connected wallet:", walletInfo);
+			try {
+				const walletInfo = await connector.getWallets();
+				if (walletInfo) {
+					const activeWallet = await connector.account;
+					if (activeWallet) {
+						setWalletAddress(activeWallet.address);
+						console.log("Connected wallet:", activeWallet);
+					}
+				}
+			} catch (error) {
+				console.error("Error loading wallet:", error);
 			}
 		};
 
 		loadWallet();
 
 		// Subscribe to wallet changes
-		const unsubscribe = connector.onStatusChange((wallet) => {
+		const unsubscribe = connector.onStatusChange(async (wallet) => {
 			if (wallet) {
 				setWalletAddress(wallet.account.address);
 				toast({
@@ -91,30 +90,13 @@ const Landing = () => {
 				throw new Error("Wallet connector not initialized");
 			}
 
-			// Get available wallets
-			const wallets = await connector.getWallets();
-
-			// For Telegram, we'll prioritize the TON Wallet
-			const tonWallet = wallets.find((wallet) =>
-				wallet.name.toLowerCase().includes("ton")
-			);
-
-			if (!tonWallet) {
-				throw new Error("TON Wallet not found");
-			}
-
-			// Generate universal link
-			const universalLink = connector.connect({
-				universalUrl: tonWallet.universalUrl,
-				bridgeUrl: tonWallet.bridgeUrl,
-			});
-
 			if (tg?.openTonWallet) {
 				// Use Telegram's native TON wallet if available
 				await tg.openTonWallet();
 			} else {
-				// Fallback to universal link
-				window.open(universalLink, "_blank");
+				// Generate connection link for desktop or other wallets
+				const walletConnectionSource = await connector.connect();
+				window.open(walletConnectionSource.universal_url, "_blank");
 			}
 		} catch (error) {
 			console.error("Wallet connection error:", error);
@@ -152,7 +134,6 @@ const Landing = () => {
 		}
 	};
 
-	// Rest of the JSX remains the same
 	return (
 		<VStack
 			width="full"
