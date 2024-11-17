@@ -17,7 +17,7 @@ try {
 			<ChakraProvider>
 				<TonConnectUIProvider
 					manifestUrl={
-						"https://github.com/damzylance/mini-app/blob/main/tonconnect-manifest.json"
+						"https://damzylance.github.io/manifest-test/tonconnect-manifest.json"
 					}
 				>
 					<App />
