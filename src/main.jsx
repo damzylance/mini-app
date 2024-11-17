@@ -15,7 +15,7 @@ try {
 	ReactDOM.createRoot(document.getElementById("root")).render(
 		<React.StrictMode>
 			<ChakraProvider>
-				<TonConnectUIProvider manifestUrl="https://bitgiftytg.vercel.app/tonconnect-manifest.json">
+				<TonConnectUIProvider manifestUrl="https://api.jsonbin.io/v3/b/6739d5f3ad19ca34f8cb7947">
 					<App />
 				</TonConnectUIProvider>
 			</ChakraProvider>
