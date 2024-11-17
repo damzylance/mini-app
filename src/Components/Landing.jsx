@@ -8,24 +8,22 @@ import {
 	useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { TonConnect } from "@tonconnect/sdk";
+import {
+	TonConnectButton,
+	useTonAddress,
+	useTonConnectUI,
+} from "@tonconnect/ui-react";
 import Bet9jaLogo from "../assets/images/Bet9jaLogo.png";
 import dottedBg from "../assets/images/dottedBg.png";
 import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 
-// const manifestConfiguration = {
-// 	manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
-// 	checkNetworkId: false, // Set this to true if you want to check network ID
-// };
-
 const Landing = () => {
 	const toast = useToast();
 	const [tg, setTg] = useState(null);
-	const [connector, setConnector] = useState(null);
-	const [walletAddress, setWalletAddress] = useState("");
-	const [isConnecting, setIsConnecting] = useState(false);
+	const address = useTonAddress();
+	const [tonConnectUI] = useTonConnectUI();
 
 	// Initialize Telegram WebApp
 	useEffect(() => {
@@ -37,91 +35,9 @@ const Landing = () => {
 		}
 	}, []);
 
-	// Initialize TON Connect
-	useEffect(() => {
-		const connector = new TonConnect({
-			manifestUrl: "https://bitgiftytg.vercel.app/tonconnect-manifest.json",
-		});
-		setConnector(connector);
-
-		// Check if wallet is already connected
-		const loadWallet = async () => {
-			try {
-				const walletInfo = await connector.getWallets();
-				if (walletInfo) {
-					const activeWallet = await connector.account;
-					if (activeWallet) {
-						setWalletAddress(activeWallet.address);
-						console.log("Connected wallet:", activeWallet);
-					}
-				}
-			} catch (error) {
-				console.error("Error loading wallet:", error);
-			}
-		};
-
-		loadWallet();
-
-		// Subscribe to wallet changes
-		const unsubscribe = connector.onStatusChange(async (wallet) => {
-			if (wallet) {
-				setWalletAddress(wallet.account.address);
-				toast({
-					title: "Wallet Connected",
-					description: "Successfully connected to TON wallet",
-					status: "success",
-					duration: 3000,
-					isClosable: true,
-				});
-			} else {
-				setWalletAddress("");
-			}
-		});
-
-		// Cleanup subscription
-		return () => {
-			unsubscribe();
-		};
-	}, []);
-
-	const handleWalletConnect = async () => {
-		const walletConnectionSource = {
-			universalLink: "https://app.tonkeeper.com/ton-connect",
-			bridgeUrl: "https://bridge.tonapi.io/bridge",
-		};
-		try {
-			setIsConnecting(true);
-
-			if (!connector) {
-				throw new Error("Wallet connector not initialized");
-			}
-
-			if (tg?.openTonWallet) {
-				// Use Telegram's native TON wallet if available
-				await tg.openTonWallet();
-			} else {
-				// Generate connection link for desktop or other wallets
-				const universalLink = await connector.connect(walletConnectionSource);
-				// window.open(walletConnectionSource.universal_url, "_blank");
-			}
-		} catch (error) {
-			console.error("Wallet connection error:", error);
-			toast({
-				title: "Connection Error",
-				description: error.message || "Failed to connect wallet",
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		} finally {
-			setIsConnecting(false);
-		}
-	};
-
 	const handleDisconnect = async () => {
 		try {
-			await connector?.disconnect();
-			setWalletAddress("");
+			await tonConnectUI.disconnect();
 			toast({
 				title: "Wallet Disconnected",
 				status: "info",
@@ -195,25 +111,7 @@ const Landing = () => {
 					</HStack>
 				</HStack>
 
-				{/* Wallet Connect Button */}
-				<Button
-					width="full"
-					py="30px"
-					size="lg"
-					bg={walletAddress ? "#444" : "#0D7B3C"}
-					color="white"
-					_hover={{ bg: walletAddress ? "#555" : "#0D7B3C" }}
-					onClick={walletAddress ? handleDisconnect : handleWalletConnect}
-					isLoading={isConnecting}
-					loadingText="Connecting..."
-				>
-					{walletAddress
-						? `Disconnect Wallet (${walletAddress.slice(
-								0,
-								6
-						  )}...${walletAddress.slice(-4)})`
-						: "Connect TON Wallet"}
-				</Button>
+				<TonConnectButton />
 
 				<Button
 					width="full"
@@ -222,7 +120,7 @@ const Landing = () => {
 					bg="#0D7B3C"
 					color="white"
 					_hover={{ bg: "#0D7B3C" }}
-					isDisabled={!walletAddress}
+					isDisabled={!address}
 				>
 					Bet9ja Topup
 				</Button>

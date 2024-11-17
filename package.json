@@ -14,6 +14,7 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@tonconnect/sdk": "^3.0.5",
+    "@tonconnect/ui-react": "^2.0.9",
     "@twa-dev/sdk": "^7.10.1",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "framer-motion": "^10.18.0",
