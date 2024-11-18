@@ -5,6 +5,7 @@ import {
 	Select,
 	Text,
 	VStack,
+	useDisclosure,
 	useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
@@ -19,9 +20,12 @@ import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 import axios from "axios";
+import { UtilityDrawer } from "./UtilityModal";
 
 const Landing = () => {
 	const toast = useToast();
+	const { isOpen, onOpen, onClose } = useDisclosure();
+
 	const [tg, setTg] = useState(null);
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
@@ -56,15 +60,38 @@ const Landing = () => {
 	};
 
 	const transactionRequest = {
-		valid_until: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+		validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 		messages: [
 			{
 				address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
 				amount: "100000000", // in nanoTON
-				payload: "", // Optional: add payload if required
-				state_init: null, // Optional: include if deploying a contract
+				// payload: "", // Optional: add payload if required
+				// state_init: null, // Optional: include if deploying a contract
 			},
 		],
+	};
+
+	const handleSendTon = async () => {
+		try {
+			const txHash = await tonConnectUI.sendTransaction(transactionRequest);
+			console.log(txHash);
+			toast({
+				title: "Transaction Sent",
+				description: "Your Bet9ja top-up was successful.",
+				status: "success",
+				duration: 3000,
+				isClosable: true,
+			});
+		} catch (error) {
+			console.error("Error sending transaction:", error);
+			toast({
+				title: "Transaction Failed",
+				description: error.message || "An error occurred while sending TON.",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+		}
 	};
 
 	useEffect(() => {
@@ -108,7 +135,7 @@ const Landing = () => {
 					<VStack alignItems="flex-start">
 						<Text fontSize="12px">Your Current Balance</Text>
 						<Text fontSize="30px" fontWeight="500">
-							₦{balance.toFixed(2) * 9216}
+							₦{(balance * 9216).toFixed(2)}
 						</Text>
 					</VStack>
 					<HStack>
@@ -135,32 +162,9 @@ const Landing = () => {
 					color="white"
 					_hover={{ bg: "#0D7B3C" }}
 					isDisabled={!address}
-					onClick={async () => {
-						try {
-							// Create transaction object
-							// Send transaction via TonConnect
-							const txHash = await tonConnectUI.sendTransaction(
-								transactionRequest
-							);
-							console.log(txHash);
-							toast({
-								title: "Transaction Sent",
-								description: "Your Bet9ja top-up was successful.",
-								status: "success",
-								duration: 3000,
-								isClosable: true,
-							});
-						} catch (error) {
-							console.error("Error sending transaction:", error);
-							toast({
-								title: "Transaction Failed",
-								description:
-									error.message || "An error occurred while sending TON.",
-								status: "error",
-								duration: 3000,
-								isClosable: true,
-							});
-						}
+					onClick={() => {
+						// handleSendTon();
+						onOpen();
 					}}
 				>
 					Bet9ja Topup
@@ -199,6 +203,12 @@ const Landing = () => {
 				width="full"
 				loading="lazy"
 				alt=""
+			/>
+			<UtilityDrawer
+				isOpen={isOpen}
+				onClose={() => {
+					onClose();
+				}}
 			/>
 		</VStack>
 	);
