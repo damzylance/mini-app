@@ -152,7 +152,7 @@ const TopUpForm = () => {
 								<HStack width={"full"} justifyContent={"space-between"}>
 									{" "}
 									<FormLabel fontSize={"sm"} color={"#000"}>
-										Amount {`(${userCurrencyTicker})`}
+										Amount (₦)
 									</FormLabel>
 									<Text fontSize={"xs"} color={"#000"}>
 										Balance ({userCurrencyTicker}):{" "}
