@@ -18,13 +18,14 @@ import dottedBg from "../assets/images/dottedBg.png";
 import isolatedRight from "../assets/images/Isolation_Mode.png";
 import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
+import axios from "axios";
 
 const Landing = () => {
 	const toast = useToast();
 	const [tg, setTg] = useState(null);
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
-
+	const [balance, setBalance] = useState(4);
 	// Initialize Telegram WebApp
 	useEffect(() => {
 		if (window.Telegram?.WebApp) {
@@ -34,6 +35,25 @@ const Landing = () => {
 			tgApp.expand();
 		}
 	}, []);
+
+	const fetchTonBalance = async () => {
+		if (address) {
+			try {
+				// Replace with a reliable TON API endpoint
+				const response = await axios.get(
+					`https://toncenter.com/api/v2/getAddressInformation?address=${address}`
+				);
+				// Balance is returned in nanoTON (1 TON = 10^9 nanoTON)
+				console.log(response);
+				const balanceNanoTon = response.data.result.balance;
+				const balanceTon = balanceNanoTon / 1e9; // Convert to TON
+				setBalance(balanceTon);
+			} catch (error) {
+				console.error("Error fetching TON balance:", error);
+				return 0; // Return 0 if there's an error
+			}
+		}
+	};
 
 	const handleDisconnect = async () => {
 		try {
@@ -56,6 +76,9 @@ const Landing = () => {
 		}
 	};
 
+	useEffect(() => {
+		fetchTonBalance();
+	}, [address]);
 	return (
 		<VStack
 			width="full"
@@ -99,7 +122,7 @@ const Landing = () => {
 					</VStack>
 					<HStack>
 						<Text fontSize="16px" fontWeight="900">
-							5.72
+							{balance}
 						</Text>
 						<Select
 							borderRadius="full"
