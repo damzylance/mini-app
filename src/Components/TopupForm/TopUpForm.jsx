@@ -154,13 +154,13 @@ const TopUpForm = () => {
 									<FormLabel fontSize={"sm"} color={"#000"}>
 										Amount (₦)
 									</FormLabel>
-									<Text fontSize={"xs"} color={"#000"}>
+									{/* <Text fontSize={"xs"} color={"#000"}>
 										Balance ({userCurrencyTicker}):{" "}
 										{(
 											parseFloat(tokenBalance) *
 											parseFloat(tokenToNairaRate.toString())
 										).toFixed(2)}
-									</Text>
+									</Text> */}
 								</HStack>
 
 								<Input
@@ -173,13 +173,13 @@ const TopUpForm = () => {
 									{...register("amount", {
 										onChange: handleAmountChange,
 
-										max: {
-											value: parseFloat(tokenBalance) * tokenToNairaRate,
-											message: "Insufficient balance",
-										},
+										// max: {
+										// 	value: parseFloat(tokenBalance) * tokenToNairaRate,
+										// 	message: "Insufficient balance",
+										// },
 										min: {
 											value: 100,
-											message: `Minimum recharge amount is ${countrySettings.minAmount}`,
+											message: `Minimum recharge amount is $100`,
 										},
 									})}
 								/>
