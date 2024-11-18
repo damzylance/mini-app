@@ -168,7 +168,6 @@ const TopUpForm = () => {
 									outline={"none"}
 									fontSize={"16px"}
 									type="number"
-									placeholder={countrySettings.placeHolder}
 									required
 									{...register("amount", {
 										onChange: handleAmountChange,
