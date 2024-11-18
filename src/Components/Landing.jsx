@@ -25,7 +25,7 @@ const Landing = () => {
 	const [tg, setTg] = useState(null);
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
-	const [balance, setBalance] = useState(4);
+	const [balance, setBalance] = useState(0);
 	// Initialize Telegram WebApp
 	useEffect(() => {
 		if (window.Telegram?.WebApp) {
@@ -55,18 +55,16 @@ const Landing = () => {
 		}
 	};
 
-	const handleSendTon = async (amountTon) => {
-		const transactionRequest = {
-			valid_until: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
-			messages: [
-				{
-					address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
-					amount: (amountTon * 1e9).toString(), // Convert TON to nanoTON
-				},
-			],
-		};
-
-		return transactionRequest;
+	const transactionRequest = {
+		valid_until: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+		messages: [
+			{
+				address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
+				amount: "100000000", // in nanoTON
+				payload: "", // Optional: add payload if required
+				state_init: null, // Optional: include if deploying a contract
+			},
+		],
 	};
 
 	useEffect(() => {
@@ -110,12 +108,12 @@ const Landing = () => {
 					<VStack alignItems="flex-start">
 						<Text fontSize="12px">Your Current Balance</Text>
 						<Text fontSize="30px" fontWeight="500">
-							N8632.50
+							₦{balance.toFixed(2) * 9216}
 						</Text>
 					</VStack>
 					<HStack>
 						<Text fontSize="16px" fontWeight="900">
-							{balance}
+							{balance.toFixed(2)}
 						</Text>
 						<Select
 							borderRadius="full"
@@ -140,9 +138,11 @@ const Landing = () => {
 					onClick={async () => {
 						try {
 							// Create transaction object
-							const transactionRequest = await handleSendTon(0.1);
 							// Send transaction via TonConnect
-							await tonConnectUI.sendTransaction(transactionRequest);
+							const txHash = await tonConnectUI.sendTransaction(
+								transactionRequest
+							);
+							console.log(txHash);
 							toast({
 								title: "Transaction Sent",
 								description: "Your Bet9ja top-up was successful.",
