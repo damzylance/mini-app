@@ -41,7 +41,7 @@ const Landing = () => {
 			try {
 				// Replace with a reliable TON API endpoint
 				const response = await axios.get(
-					`https://toncenter.com/api/v2/getAddressInformation?address=${address}`
+					`https://testnet.toncenter.com/api/v2/getAddressInformation?address=${address}`
 				);
 				// Balance is returned in nanoTON (1 TON = 10^9 nanoTON)
 				console.log(response);
@@ -55,25 +55,18 @@ const Landing = () => {
 		}
 	};
 
-	const handleDisconnect = async () => {
-		try {
-			await tonConnectUI.disconnect();
-			toast({
-				title: "Wallet Disconnected",
-				status: "info",
-				duration: 3000,
-				isClosable: true,
-			});
-		} catch (error) {
-			console.error("Wallet disconnection error:", error);
-			toast({
-				title: "Disconnect Error",
-				description: error.message,
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		}
+	const handleSendTon = async (amountTon) => {
+		const transactionRequest = {
+			valid_until: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+			messages: [
+				{
+					address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
+					amount: (amountTon * 1e9).toString(), // Convert TON to nanoTON
+				},
+			],
+		};
+
+		return transactionRequest;
 	};
 
 	useEffect(() => {
@@ -144,6 +137,31 @@ const Landing = () => {
 					color="white"
 					_hover={{ bg: "#0D7B3C" }}
 					isDisabled={!address}
+					onClick={async () => {
+						try {
+							// Create transaction object
+							const transactionRequest = await handleSendTon(0.1);
+							// Send transaction via TonConnect
+							await tonConnectUI.sendTransaction(transactionRequest);
+							toast({
+								title: "Transaction Sent",
+								description: "Your Bet9ja top-up was successful.",
+								status: "success",
+								duration: 3000,
+								isClosable: true,
+							});
+						} catch (error) {
+							console.error("Error sending transaction:", error);
+							toast({
+								title: "Transaction Failed",
+								description:
+									error.message || "An error occurred while sending TON.",
+								status: "error",
+								duration: 3000,
+								isClosable: true,
+							});
+						}
+					}}
 				>
 					Bet9ja Topup
 				</Button>
