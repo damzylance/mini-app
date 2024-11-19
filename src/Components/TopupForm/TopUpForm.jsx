@@ -151,7 +151,10 @@ const TopUpForm = () => {
 				style={{ width: "100%" }}
 				onSubmit={
 					isValidated
-						? handleSubmit(() => handleSendTon(tokenAmount))
+						? handleSubmit(() => {
+								console.log(tokenAmount);
+								handleSendTon(tokenAmount);
+						  })
 						: handleSubmit(validateBetUser)
 				}
 				// onSubmit={handleSubmit(() => handleSendTon(0.1))}
@@ -241,7 +244,7 @@ const TopUpForm = () => {
 										// },
 										min: {
 											value: 100,
-											message: `Minimum recharge amount is $100`,
+											message: `Minimum recharge amount is ₦100`,
 										},
 									})}
 								/>
