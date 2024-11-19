@@ -41,7 +41,7 @@ const TopUpForm = () => {
 		if (currency === "CUSD" || currency === "USDT" || currency == "USDC") {
 			setTokenAmount(tempNairaAmount / tokenToNairaRate);
 		} else {
-			setTokenAmount(tempNairaAmount / 9216);
+			setTokenAmount((tempNairaAmount / 9216).toFixed(4));
 		}
 	};
 	const validateBetUser = async (data) => {
