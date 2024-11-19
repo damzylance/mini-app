@@ -41,7 +41,7 @@ const TopUpForm = () => {
 		if (currency === "CUSD" || currency === "USDT" || currency == "USDC") {
 			setTokenAmount(tempNairaAmount / tokenToNairaRate);
 		} else {
-			setTokenAmount((tempNairaAmount / 9216).toFixed(4));
+			setTokenAmount(tempNairaAmount / 9216);
 		}
 	};
 	const validateBetUser = async (data) => {
@@ -86,13 +86,14 @@ const TopUpForm = () => {
 		// setIsValidated(true);
 	};
 	const handleSendTon = async (amountTon) => {
+		const formattedAmount = parseFloat(amountTon).toFixed(4);
 		if (address) {
 			const transactionRequest = {
 				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 				messages: [
 					{
 						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-						amount: (amountTon * 1e9).toString(), // in nanoTON
+						amount: (formattedAmount * 1e9).toString(), // in nanoTON
 						// payload: "", // Optional: add payload if required
 						// state_init: null, // Optional: include if deploying a contract
 					},
