@@ -98,6 +98,7 @@ const TopUpForm = () => {
 					},
 				],
 			};
+			setLoading(true);
 			try {
 				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
 				console.log(txHash);
@@ -108,8 +109,10 @@ const TopUpForm = () => {
 					duration: 3000,
 					isClosable: true,
 				});
+				setLoading(false);
 			} catch (error) {
 				console.error("Error sending transaction:", error);
+				setLoading(false);
 				toast({
 					title: "Transaction Failed",
 					description: error.message || "An error occurred while sending TON.",
@@ -151,6 +154,7 @@ const TopUpForm = () => {
 						? handleSubmit(() => handleSendTon(tokenAmount))
 						: handleSubmit(validateBetUser)
 				}
+				// onSubmit={handleSubmit(() => handleSendTon(0.1))}
 			>
 				<VStack width={"full"} gap={"20px"}>
 					<FormControl>
