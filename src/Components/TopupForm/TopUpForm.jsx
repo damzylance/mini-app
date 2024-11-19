@@ -16,7 +16,11 @@ import {
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
+import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 const TopUpForm = () => {
+	const address = useTonAddress();
+	const [tonConnectUI] = useTonConnectUI();
+
 	const toast = useToast();
 	const {
 		register,
@@ -41,32 +45,88 @@ const TopUpForm = () => {
 		}
 	};
 	const validateBetUser = async (data) => {
-		data.phone = `234${data.phone}`;
-		try {
-			setLoading(true);
-			await axios
-				.post(`${import.meta.env.VITE_BASE_URL}bet/validate-customer/`, data)
-				.then((response) => {
-					console.log(response.data);
-					setValidationToken(response.data.token);
-					setAccountHolder(
-						`${response.data.firstName} ${response.data.lastName}`
-					);
-					setIsValidated(true);
-					setLoading(false);
-				})
-				.catch((error) => {
-					toast({ title: error.response.data.error, status: "warning" });
-					setIsValidated(false);
-					setLoading(false);
-				});
-		} catch (error) {
-			toast({ title: "Error validating details", status: "warning" });
-			console.log(error);
-			setLoading(false);
+		if (address) {
+			data.phone = `234${data.phone}`;
+			try {
+				setLoading(true);
+				await axios
+					.post(`${import.meta.env.VITE_BASE_URL}bet/validate-customer/`, data)
+					.then((response) => {
+						console.log(response.data);
+						setValidationToken(response.data.token);
+						setAccountHolder(
+							`${response.data.firstName} ${response.data.lastName}`
+						);
+						setIsValidated(true);
+						setLoading(false);
+					})
+					.catch((error) => {
+						toast({
+							title: error.response.data.error,
+							status: "warning",
+						});
+						setIsValidated(false);
+						setLoading(false);
+					});
+			} catch (error) {
+				toast({ title: "Error validating details", status: "warning" });
+				console.log(error);
+				setLoading(false);
+			}
+		} else {
+			toast({
+				title: "Wallet not connected",
+				description: "Connect wallet to perform this action",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
 		}
 
 		// setIsValidated(true);
+	};
+	const handleSendTon = async (amountTon) => {
+		if (address) {
+			const transactionRequest = {
+				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+				messages: [
+					{
+						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
+						amount: (amountTon * 1e9).toString(), // in nanoTON
+						// payload: "", // Optional: add payload if required
+						// state_init: null, // Optional: include if deploying a contract
+					},
+				],
+			};
+			try {
+				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
+				console.log(txHash);
+				toast({
+					title: "Transaction Sent",
+					description: "Your Bet9ja top-up was successful.",
+					status: "success",
+					duration: 3000,
+					isClosable: true,
+				});
+			} catch (error) {
+				console.error("Error sending transaction:", error);
+				toast({
+					title: "Transaction Failed",
+					description: error.message || "An error occurred while sending TON.",
+					status: "error",
+					duration: 3000,
+					isClosable: true,
+				});
+			}
+		} else {
+			toast({
+				title: "Wallet not connected",
+				description: "Connect wallet to perform this transaction",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+		}
 	};
 	return (
 		<VStack my={"20px"} gap={"10px"} width={"full"} color={"#FBFCFC"}>
@@ -88,7 +148,7 @@ const TopUpForm = () => {
 				style={{ width: "100%" }}
 				onSubmit={
 					isValidated
-						? handleSubmit(() => console.log("submit"))
+						? handleSubmit(() => handleSendTon(tokenAmount))
 						: handleSubmit(validateBetUser)
 				}
 			>
@@ -152,9 +212,7 @@ const TopUpForm = () => {
 							<FormControl>
 								<HStack width={"full"} justifyContent={"space-between"}>
 									{" "}
-									<FormLabel fontSize={"sm"} color={"#000"}>
-										Amount (₦)
-									</FormLabel>
+									<FormLabel fontSize={"sm"}>Amount (₦)</FormLabel>
 									{/* <Text fontSize={"xs"} color={"#000"}>
 										Balance ({userCurrencyTicker}):{" "}
 										{(

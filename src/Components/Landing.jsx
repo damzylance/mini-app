@@ -71,7 +71,18 @@ const Landing = () => {
 		],
 	};
 
-	const handleSendTon = async () => {
+	const handleSendTon = async (amountTon) => {
+		const transactionRequest = {
+			validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+			messages: [
+				{
+					address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
+					amount: (amountTon * 1e9).toString(), // in nanoTON
+					// payload: "", // Optional: add payload if required
+					// state_init: null, // Optional: include if deploying a contract
+				},
+			],
+		};
 		try {
 			const txHash = await tonConnectUI.sendTransaction(transactionRequest);
 			console.log(txHash);
