@@ -4,6 +4,7 @@ import App from "./App.jsx";
 import WebApp from "@twa-dev/sdk";
 import { ChakraProvider } from "@chakra-ui/react";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import theme from "../theme.js";
 
 // Initialize WebApp
 WebApp.ready();
@@ -14,7 +15,7 @@ WebApp.ready();
 try {
 	ReactDOM.createRoot(document.getElementById("root")).render(
 		<React.StrictMode>
-			<ChakraProvider>
+			<ChakraProvider theme={theme}>
 				<TonConnectUIProvider
 					manifestUrl={
 						"https://damzylance.github.io/manifest-test/tonconnect-manifest.json"

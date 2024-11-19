@@ -17,8 +17,13 @@ export const UtilityDrawer = (props) => {
 			onClose={props.onClose}
 			placement={"bottom"}
 		>
-			<DrawerOverlay />
-			<DrawerContent borderTopRadius={"24px"} color={"#fff"} bg={"#272A2F"}>
+			<DrawerOverlay zIndex={"900 !important"} />
+			<DrawerContent
+				zIndex={"900 !important"}
+				borderTopRadius={"24px"}
+				color={"#fff"}
+				bg={"#272A2F"}
+			>
 				<DrawerCloseButton />
 				<DrawerBody>
 					<VStack width={"full"}>
