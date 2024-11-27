@@ -18,6 +18,7 @@ import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { bet9jaTopup } from "../../helpers/topup";
+import { pollTransactionHash } from "../../helpers/pollTransactions";
 const TopUpForm = () => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
@@ -118,48 +119,49 @@ const TopUpForm = () => {
 					{
 						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
 						amount: (formattedAmount * 1e9).toString(), // in nanoTON
-						// payload: "", // Optional: add payload if required
-						// state_init: null, // Optional: include if deploying a contract
 					},
 				],
 			};
 			setLoading(true);
 			try {
-				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
-				const hash = txHash.boc.toString("base64");
-				console.log(hash);
+				// Send transaction and get the boc
+				const txResponse = await tonConnectUI.sendTransaction(
+					transactionRequest
+				);
+				const boc = txResponse.boc.toString("base64");
+				console.log("Transaction BOC:", boc);
 
+				// Poll for transaction confirmation
+				const transactionHash = await pollTransactionHash(address, boc);
+				console.log("Transaction Hash:", transactionHash);
+
+				// Prepare data for the backend
 				const data = {
 					chain: "ton",
 					wallet_address: address,
 					country: "NG",
 					amount: nairaAmount,
 					crypto_amount: formattedAmount,
-					transaction_hash: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
+					transaction_hash: transactionHash,
 					token: validationToken,
 					account_holder: accountHolder,
 					client_id: clientId,
 				};
 
-				console.log(data);
+				// Send data to the backend
 				const purchaseResponse = await bet9jaTopup(data);
-				console.log("purchase response", purchaseResponse);
+				console.log("Purchase Response:", purchaseResponse);
+
 				if (purchaseResponse?.status === 200) {
-					// addBeneficiary(billType.toLowerCase() as BillType, {
-					// 	phoneNumber: phoneNumber,
-					// 	provider: selectedProvider as ProviderType,
-					// });
 					toast({
 						title: getSuccessMessage(productName),
 						status: "success",
 					});
-					setLoading(false);
 				} else {
-					setLoading(false);
+					throw new Error("Purchase failed");
 				}
 			} catch (error) {
 				console.error("Error sending transaction:", error);
-				setLoading(false);
 				toast({
 					title: "Transaction Failed",
 					description: error.message || "An error occurred while sending TON.",
@@ -167,6 +169,8 @@ const TopUpForm = () => {
 					duration: 3000,
 					isClosable: true,
 				});
+			} finally {
+				setLoading(false);
 			}
 		} else {
 			toast({
