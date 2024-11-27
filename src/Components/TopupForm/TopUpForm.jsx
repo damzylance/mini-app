@@ -132,12 +132,8 @@ const TopUpForm = () => {
 						status: "success",
 					});
 					setLoading(false);
-					setIsProcessing(false); // Reset processing state
-					router.push("/");
 				} else {
 					setLoading(false);
-					setIsProcessing(false); // Reset processing state
-					toast({ title: "Error occured ", status: "warning" });
 				}
 			} catch (error) {
 				console.error("Error sending transaction:", error);
