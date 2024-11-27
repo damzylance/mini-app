@@ -171,6 +171,7 @@ const TopUpForm = () => {
 								outline={"none"}
 								isDisabled={isValidated}
 								type="number"
+								inputMode={"numeric"}
 								required
 								{...register("phone", {
 									minLength: {
@@ -197,7 +198,8 @@ const TopUpForm = () => {
 							border={"1px solid #506DBB"}
 							isDisabled={isValidated}
 							outline={"none"}
-							type="text"
+							type="number"
+							inputMode={"numeric"}
 							required
 							{...register(
 								"client_id"
@@ -235,6 +237,7 @@ const TopUpForm = () => {
 									outline={"none"}
 									fontSize={"16px"}
 									type="number"
+									inputMode={"numeric"}
 									required
 									{...register("amount", {
 										onChange: handleAmountChange,
