@@ -131,14 +131,13 @@ const TopUpForm = () => {
 						title: getSuccessMessage(productName),
 						status: "success",
 					});
-					setIsLoading(false);
+					setLoading(false);
 					setIsProcessing(false); // Reset processing state
 					router.push("/");
 				} else {
-					setIsLoading(false);
+					setLoading(false);
 					setIsProcessing(false); // Reset processing state
 					toast({ title: "Error occured ", status: "warning" });
-					onClose();
 				}
 			} catch (error) {
 				console.error("Error sending transaction:", error);
