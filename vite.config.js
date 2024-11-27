@@ -21,7 +21,7 @@ export default defineConfig({
 	optimizeDeps: {
 		include: ["buffer"],
 	},
-	server: {
-		port: 3000,
-	},
+	// server: {
+	// 	port: 3000,
+	// },
 });

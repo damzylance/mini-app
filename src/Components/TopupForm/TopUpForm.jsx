@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
+import { bet9jaTopup } from "../../helpers/topup";
 const TopUpForm = () => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
@@ -31,6 +32,7 @@ const TopUpForm = () => {
 	const [isValidated, setIsValidated] = useState(false);
 	const [validationToken, setValidationToken] = useState("");
 	const [accountHolder, setAccountHolder] = useState("");
+	const [clientId, setClientId] = useState("");
 	const [nairaAmount, setNairaAmount] = useState(0);
 	const [tokenAmount, setTokenAmount] = useState(0);
 	const [currency, setCurrency] = useState("TON");
@@ -58,6 +60,7 @@ const TopUpForm = () => {
 							`${response.data.firstName} ${response.data.lastName}`
 						);
 						setIsValidated(true);
+						setClientId(data.client_id);
 						setLoading(false);
 					})
 					.catch((error) => {
@@ -103,14 +106,40 @@ const TopUpForm = () => {
 			try {
 				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
 				console.log(txHash);
-				toast({
-					title: "Transaction Sent",
-					description: "Your Bet9ja top-up was successful.",
-					status: "success",
-					duration: 3000,
-					isClosable: true,
-				});
-				setLoading(false);
+
+				const data = {
+					chain: ton,
+					wallet_address: address,
+					country: "NG",
+					amount: amount.toString(),
+					crypto_amount: formattedAmount,
+					transaction_hash: txHash,
+					token: validationToken,
+					account_holder: accountHolder,
+					client_id: clientId,
+				};
+
+				console.log(data);
+				const purchaseResponse = await bet9jaTopup(data);
+				console.log("purchase response", purchaseResponse);
+				if (purchaseResponse?.status === 200) {
+					// addBeneficiary(billType.toLowerCase() as BillType, {
+					// 	phoneNumber: phoneNumber,
+					// 	provider: selectedProvider as ProviderType,
+					// });
+					toast({
+						title: getSuccessMessage(productName),
+						status: "success",
+					});
+					setIsLoading(false);
+					setIsProcessing(false); // Reset processing state
+					router.push("/");
+				} else {
+					setIsLoading(false);
+					setIsProcessing(false); // Reset processing state
+					toast({ title: "Error occured ", status: "warning" });
+					onClose();
+				}
 			} catch (error) {
 				console.error("Error sending transaction:", error);
 				setLoading(false);

@@ -1,4 +1,4 @@
-export const bet9jaTopup = async (data) => {
+export const bet9jaValidation = async (data) => {
 	console.log(data);
 	try {
 		const response = await axios.post(
