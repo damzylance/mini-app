@@ -22,7 +22,7 @@ export const pollTransactionHash = async (address, boc) => {
 		}
 
 		// Wait for a bit before retrying
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+		await new Promise((resolve) => setTimeout(resolve, 5000));
 	}
 
 	throw new Error("Transaction not confirmed in time.");

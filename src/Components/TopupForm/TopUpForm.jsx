@@ -23,6 +23,9 @@ const TopUpForm = () => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
 
+	const ddboc =
+		"te6cckEBBAEAtgAB5YgApAD6/2T3VjoFLUIJKOH/LXGG6VcUvCDdAZmfQTyc0VwDm0s7c////+s6PThwAAAApekkvVjfz4ShqHmHABW9jGpBBzje9zTQE2uBIWCjXJZaKi5K1ViUNsQMr5FRdwkcdkBJofZtgjn1bI4FfadBgh0BAgoOw8htAwMCAGZCAFTeFQwJ6siImwEPBOqup+6CyFMdvb2Ump3nK8UXIqAVHTKRAAAAAAAAAAAAAAAAAAAAAJwR8aQ=";
+
 	const toast = useToast();
 	const {
 		register,
