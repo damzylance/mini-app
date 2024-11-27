@@ -108,7 +108,7 @@ const TopUpForm = () => {
 				console.log(txHash);
 
 				const data = {
-					chain: ton,
+					chain: "ton",
 					wallet_address: address,
 					country: "NG",
 					amount: amount.toString(),
