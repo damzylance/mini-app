@@ -113,7 +113,7 @@ const TopUpForm = () => {
 					country: "NG",
 					amount: amount.toString(),
 					crypto_amount: formattedAmount,
-					transaction_hash: txHash,
+					transaction_hash: txHash.boc,
 					token: validationToken,
 					account_holder: accountHolder,
 					client_id: clientId,
