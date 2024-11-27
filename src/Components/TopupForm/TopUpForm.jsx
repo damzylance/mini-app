@@ -13,6 +13,7 @@ import {
 	VStack,
 	useToast,
 } from "@chakra-ui/react";
+import { createHash } from "crypto";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
@@ -105,7 +106,12 @@ const TopUpForm = () => {
 			setLoading(true);
 			try {
 				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
-				console.log(txHash);
+
+				const bocBinary = Buffer.from(bocBase64, "base64");
+
+				// Step 2: Compute SHA-256 hash
+				const hash = createHash("sha256").update(bocBinary).digest("hex");
+				console.log("Transaction Hash:", hash);
 
 				const data = {
 					chain: "ton",
@@ -113,7 +119,7 @@ const TopUpForm = () => {
 					country: "NG",
 					amount: nairaAmount,
 					crypto_amount: formattedAmount,
-					transaction_hash: txHash.boc,
+					transaction_hash: hash,
 					token: validationToken,
 					account_holder: accountHolder,
 					client_id: clientId,
