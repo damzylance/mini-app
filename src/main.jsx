@@ -5,6 +5,8 @@ import WebApp from "@twa-dev/sdk";
 import { ChakraProvider } from "@chakra-ui/react";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import theme from "../theme.js";
+import * as Buffer from "buffer";
+window.Buffer = Buffer.Buffer;
 
 // Initialize WebApp
 WebApp.ready();
