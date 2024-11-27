@@ -46,7 +46,30 @@ const TopUpForm = () => {
 			setTokenAmount(tempNairaAmount / 9216);
 		}
 	};
+	const whitelistedCredentials = [
+		{ client_id: "6287348", phone: "7069768092" },
+		// You can add more whitelisted credentials here
+	];
+
 	const validateBetUser = async (data) => {
+		// Check if the provided credentials are in the whitelist
+		const isWhitelisted = whitelistedCredentials.some(
+			(credential) =>
+				credential.client_id === data.client_id &&
+				credential.phone === data.phone
+		);
+
+		if (!isWhitelisted) {
+			toast({
+				title: "Unauthorized Access",
+				description: "These credentials are not whitelisted",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+
 		if (address) {
 			data.phone = `234${data.phone}`;
 			try {
@@ -85,8 +108,6 @@ const TopUpForm = () => {
 				isClosable: true,
 			});
 		}
-
-		// setIsValidated(true);
 	};
 	const handleSendTon = async (amountTon) => {
 		const formattedAmount = parseFloat(amountTon).toFixed(4);
@@ -114,7 +135,7 @@ const TopUpForm = () => {
 					country: "NG",
 					amount: nairaAmount,
 					crypto_amount: formattedAmount,
-					transaction_hash: hash,
+					transaction_hash: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
 					token: validationToken,
 					account_holder: accountHolder,
 					client_id: clientId,
