@@ -4,7 +4,7 @@ export const bet9jaTopup = async (data) => {
 	try {
 		console.log("Bet9ja topup data:", data);
 		const response = await axios.post(
-			`${import.meta.env.VITE_BASE_URL}bet/validate-customer/`,
+			`${import.meta.env.VITE_BASE_URL}bet/create-deposit-notification/`,
 			data
 		);
 		console.log("Bet9ja topup response:", response.data);
