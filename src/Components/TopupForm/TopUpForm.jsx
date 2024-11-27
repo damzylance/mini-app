@@ -13,7 +13,6 @@ import {
 	VStack,
 	useToast,
 } from "@chakra-ui/react";
-import { createHash } from "crypto";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
@@ -109,9 +108,8 @@ const TopUpForm = () => {
 
 				const bocBinary = Buffer.from(bocBase64, "base64");
 
-				// Step 2: Compute SHA-256 hash
-				const hash = createHash("sha256").update(bocBinary).digest("hex");
-				console.log("Transaction Hash:", hash);
+				const hash = txHash.boc.toString("base64");
+				console.log(hash);
 
 				const data = {
 					chain: "ton",
