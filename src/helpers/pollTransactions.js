@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const pollTransactionHash = async (address, boc) => {
 	const apiUrl = `https://testnet.toncenter.com/api/v2/getTransactions`;
 	const params = {
