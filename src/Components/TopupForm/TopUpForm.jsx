@@ -111,7 +111,7 @@ const TopUpForm = () => {
 					chain: "ton",
 					wallet_address: address,
 					country: "NG",
-					amount: amount.toString(),
+					amount: nairaAmount,
 					crypto_amount: formattedAmount,
 					transaction_hash: txHash.boc,
 					token: validationToken,
