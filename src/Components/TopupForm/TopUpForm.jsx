@@ -105,9 +105,6 @@ const TopUpForm = () => {
 			setLoading(true);
 			try {
 				const txHash = await tonConnectUI.sendTransaction(transactionRequest);
-
-				const bocBinary = Buffer.from(bocBase64, "base64");
-
 				const hash = txHash.boc.toString("base64");
 				console.log(hash);
 
