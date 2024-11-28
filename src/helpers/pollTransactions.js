@@ -4,8 +4,7 @@ export const pollTransactionHash = async (
 	address,
 	targetAmount,
 	sentTime,
-	destinationAddress,
-	uniquePayload
+	destinationAddress
 ) => {
 	const apiUrl = `https://testnet.toncenter.com/api/v2/getTransactions`;
 	const params = {
@@ -18,28 +17,22 @@ export const pollTransactionHash = async (
 		const response = await axios.get(apiUrl, { params });
 		const transactions = response.data.result;
 
-		// Iterate through transactions to find the matching one
-		const matchingTx = transactions.find((tx) => {
-			// Check destination, amount, and time range
-			const isValidDestination = tx.in_msg?.destination === destinationAddress;
-			const isValidAmount =
-				parseFloat(tx.out_msgs[0]?.value || "0") ===
-				parseFloat(targetAmount) * 1e9;
-			const isRecent = tx.utime >= sentTime;
+		// Find the transaction with matching criteria
+		for (const tx of transactions) {
+			// Check the transaction time
+			if (tx.utime < sentTime) continue;
 
-			// Optional: Match against a unique payload if available
-			const hasMatchingPayload = uniquePayload
-				? tx.in_msg?.msg_data?.body?.includes(uniquePayload)
-				: true;
-
-			return (
-				isValidDestination && isValidAmount && isRecent && hasMatchingPayload
+			// Look for a matching `out_msg`
+			const matchingOutMsg = tx.out_msgs.find(
+				(msg) =>
+					msg.destination === destinationAddress &&
+					parseInt(msg.value || "0", 10) === Math.round(targetAmount * 1e9)
 			);
-		});
 
-		if (matchingTx) {
-			// Return the transaction hash
-			return matchingTx.transaction_id.hash;
+			if (matchingOutMsg) {
+				// Return the transaction hash
+				return tx.transaction_id.hash;
+			}
 		}
 
 		// Wait before retrying

@@ -27,7 +27,7 @@ export const UtilityDrawer = (props) => {
 				<DrawerCloseButton />
 				<DrawerBody>
 					<VStack width={"full"}>
-						<TopUpForm telco={""} onClose={props.action} name={""} />
+						<TopUpForm telco={""} onClose={props.onClose} name={""} />
 					</VStack>
 				</DrawerBody>
 			</DrawerContent>

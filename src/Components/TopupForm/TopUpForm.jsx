@@ -19,12 +19,9 @@ import { IoNotificationsOffCircleOutline } from "react-icons/io5";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { bet9jaTopup } from "../../helpers/topup";
 import { pollTransactionHash } from "../../helpers/pollTransactions";
-const TopUpForm = () => {
+const TopUpForm = (props) => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
-
-	const ddboc =
-		"te6cckEBBAEAtgAB5YgApAD6/2T3VjoFLUIJKOH/LXGG6VcUvCDdAZmfQTyc0VwDm0s7c////+s6PThwAAAApekkvVjfz4ShqHmHABW9jGpBBzje9zTQE2uBIWCjXJZaKi5K1ViUNsQMr5FRdwkcdkBJofZtgjn1bI4FfadBgh0BAgoOw8htAwMCAGZCAFTeFQwJ6siImwEPBOqup+6CyFMdvb2Ump3nK8UXIqAVHTKRAAAAAAAAAAAAAAAAAAAAAJwR8aQ=";
 
 	const toast = useToast();
 	const {
@@ -113,17 +110,16 @@ const TopUpForm = () => {
 			});
 		}
 	};
+
 	const handleSendTon = async (amountTon) => {
 		const formattedAmount = parseFloat(amountTon).toFixed(4);
 		if (address) {
-			const uniquePayload = btoa(`unique-${Date.now()}`); // Example: unique payload
 			const transactionRequest = {
 				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 				messages: [
 					{
 						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
-						amount: (formattedAmount * 1e9).toString(),
-						payload: uniquePayload, // Include unique payload
+						amount: (formattedAmount * 1e9).toString(), // in nanoTON
 					},
 				],
 			};
@@ -139,8 +135,7 @@ const TopUpForm = () => {
 					address,
 					formattedAmount,
 					sentTime,
-					"0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
-					uniquePayload
+					"EQCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKkOY"
 				);
 				console.log("Transaction Hash:", transactionHash);
 
@@ -170,6 +165,7 @@ const TopUpForm = () => {
 				toast({ title: "Error", description: error.message, status: "error" });
 			} finally {
 				setLoading(false);
+				props.onClose();
 			}
 		} else {
 			toast({
