@@ -49,6 +49,7 @@ const TopUpForm = (props) => {
 	};
 	const whitelistedCredentials = [
 		{ client_id: "6287348", phone: "7069768092" },
+		{ client_id: "18901727", phone: "8037050362" },
 		// You can add more whitelisted credentials here
 	];
 
