@@ -116,29 +116,35 @@ const TopUpForm = () => {
 	const handleSendTon = async (amountTon) => {
 		const formattedAmount = parseFloat(amountTon).toFixed(4);
 		if (address) {
+			const uniquePayload = btoa(`unique-${Date.now()}`); // Example: unique payload
 			const transactionRequest = {
 				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 				messages: [
 					{
-						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-						amount: (formattedAmount * 1e9).toString(), // in nanoTON
+						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
+						amount: (formattedAmount * 1e9).toString(),
+						payload: uniquePayload, // Include unique payload
 					},
 				],
 			};
+			const sentTime = Math.floor(Date.now() / 1000);
+
 			setLoading(true);
 			try {
-				// Send transaction and get the boc
-				const txResponse = await tonConnectUI.sendTransaction(
-					transactionRequest
-				);
-				const boc = txResponse.boc.toString("base64");
-				console.log("Transaction BOC:", boc);
+				await tonConnectUI.sendTransaction(transactionRequest);
+				console.log("Transaction sent, polling for confirmation...");
 
 				// Poll for transaction confirmation
-				const transactionHash = await pollTransactionHash(address, boc);
+				const transactionHash = await pollTransactionHash(
+					address,
+					formattedAmount,
+					sentTime,
+					"0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
+					uniquePayload
+				);
 				console.log("Transaction Hash:", transactionHash);
 
-				// Prepare data for the backend
+				// Prepare data for backend
 				const data = {
 					chain: "ton",
 					wallet_address: address,
@@ -151,40 +157,29 @@ const TopUpForm = () => {
 					client_id: clientId,
 				};
 
-				// Send data to the backend
 				const purchaseResponse = await bet9jaTopup(data);
 				console.log("Purchase Response:", purchaseResponse);
 
 				if (purchaseResponse?.status === 200) {
-					toast({
-						title: getSuccessMessage(productName),
-						status: "success",
-					});
+					toast({ title: "Transaction Successful", status: "success" });
 				} else {
 					throw new Error("Purchase failed");
 				}
 			} catch (error) {
-				console.error("Error sending transaction:", error);
-				toast({
-					title: "Transaction Failed",
-					description: error.message || "An error occurred while sending TON.",
-					status: "error",
-					duration: 3000,
-					isClosable: true,
-				});
+				console.error("Error:", error);
+				toast({ title: "Error", description: error.message, status: "error" });
 			} finally {
 				setLoading(false);
 			}
 		} else {
 			toast({
 				title: "Wallet not connected",
-				description: "Connect wallet to perform this transaction",
+				description: "Please connect your wallet to proceed.",
 				status: "error",
-				duration: 3000,
-				isClosable: true,
 			});
 		}
 	};
+
 	return (
 		<VStack my={"20px"} gap={"10px"} width={"full"} color={"#FBFCFC"}>
 			<HStack width={"full"} alignItems={"center"}>

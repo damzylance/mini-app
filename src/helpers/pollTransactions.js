@@ -1,6 +1,12 @@
 import axios from "axios";
 
-export const pollTransactionHash = async (address, boc) => {
+export const pollTransactionHash = async (
+	address,
+	targetAmount,
+	sentTime,
+	destinationAddress,
+	uniquePayload
+) => {
 	const apiUrl = `https://testnet.toncenter.com/api/v2/getTransactions`;
 	const params = {
 		address,
@@ -12,17 +18,31 @@ export const pollTransactionHash = async (address, boc) => {
 		const response = await axios.get(apiUrl, { params });
 		const transactions = response.data.result;
 
-		// Check for the transaction matching the boc
-		const matchingTx = transactions.find(
-			(tx) => tx.in_msg && tx.in_msg.boc === boc
-		);
+		// Iterate through transactions to find the matching one
+		const matchingTx = transactions.find((tx) => {
+			// Check destination, amount, and time range
+			const isValidDestination = tx.in_msg?.destination === destinationAddress;
+			const isValidAmount =
+				parseFloat(tx.out_msgs[0]?.value || "0") ===
+				parseFloat(targetAmount) * 1e9;
+			const isRecent = tx.utime >= sentTime;
+
+			// Optional: Match against a unique payload if available
+			const hasMatchingPayload = uniquePayload
+				? tx.in_msg?.msg_data?.body?.includes(uniquePayload)
+				: true;
+
+			return (
+				isValidDestination && isValidAmount && isRecent && hasMatchingPayload
+			);
+		});
 
 		if (matchingTx) {
-			// Calculate and return the transaction hash
+			// Return the transaction hash
 			return matchingTx.transaction_id.hash;
 		}
 
-		// Wait for a bit before retrying
+		// Wait before retrying
 		await new Promise((resolve) => setTimeout(resolve, 5000));
 	}
 
