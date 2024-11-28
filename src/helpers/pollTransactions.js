@@ -4,7 +4,8 @@ export const pollTransactionHash = async (address, boc) => {
 	const apiUrl = `https://testnet.toncenter.com/api/v2/getTransactions`;
 	const params = {
 		address,
-		limit: 10, // Adjust as needed
+		limit: 10,
+		api_key: "4a34b283d94ab208d77e422550fa92540e06600875319c115bc0ef05bf8e4a22",
 	};
 
 	for (let attempts = 0; attempts < 30; attempts++) {

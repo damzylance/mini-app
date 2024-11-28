@@ -43,12 +43,17 @@ const Landing = () => {
 	const fetchTonBalance = async () => {
 		if (address) {
 			try {
-				// Replace with a reliable TON API endpoint
 				const response = await axios.get(
-					`https://testnet.toncenter.com/api/v2/getAddressInformation?address=${address}`
+					`https://testnet.toncenter.com/api/v2/getAddressInformation`,
+					{
+						params: {
+							address: address,
+							api_key:
+								"4a34b283d94ab208d77e422550fa92540e06600875319c115bc0ef05bf8e4a22",
+						},
+					}
 				);
 				// Balance is returned in nanoTON (1 TON = 10^9 nanoTON)
-				console.log(response);
 				const balanceNanoTon = response.data.result.balance;
 				const balanceTon = balanceNanoTon / 1e9; // Convert to TON
 				setBalance(balanceTon);
