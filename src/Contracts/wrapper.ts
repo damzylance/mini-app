@@ -19,11 +19,9 @@ import {
 	ChangeMaster,
 	Deploy,
 	Deposit,
-	MakePayment,
 	storeChangeMaster,
 	storeDeploy,
 	storeDeposit,
-	storeMakePayment,
 	storeTransferNotification,
 	TransferNotification,
 } from "./contractUtils";

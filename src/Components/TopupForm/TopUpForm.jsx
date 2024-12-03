@@ -56,22 +56,22 @@ const TopUpForm = (props) => {
 
 	const validateBetUser = async (data) => {
 		// Check if the provided credentials are in the whitelist
-		const isWhitelisted = whitelistedCredentials.some(
-			(credential) =>
-				credential.client_id === data.client_id &&
-				credential.phone === data.phone
-		);
+		// const isWhitelisted = whitelistedCredentials.some(
+		// 	(credential) =>
+		// 		credential.client_id === data.client_id &&
+		// 		credential.phone === data.phone
+		// );
 
-		if (!isWhitelisted) {
-			toast({
-				title: "Unauthorized Access",
-				description: "These credentials are not whitelisted",
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-			return;
-		}
+		// if (!isWhitelisted) {
+		// 	toast({
+		// 		title: "Unauthorized Access",
+		// 		description: "These credentials are not whitelisted",
+		// 		status: "error",
+		// 		duration: 3000,
+		// 		isClosable: true,
+		// 	});
+		// 	return;
+		// }
 
 		if (address) {
 			data.phone = `234${data.phone}`;
