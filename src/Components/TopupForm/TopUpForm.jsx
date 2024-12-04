@@ -19,6 +19,8 @@ import { IoNotificationsOffCircleOutline } from "react-icons/io5";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { bet9jaTopup } from "../../helpers/topup";
 import { pollTransactionHash } from "../../helpers/pollTransactions";
+import { useHandleDeposit } from "../../hooks/useDepositTon";
+
 const TopUpForm = (props) => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
@@ -37,6 +39,7 @@ const TopUpForm = (props) => {
 	const [nairaAmount, setNairaAmount] = useState(0);
 	const [tokenAmount, setTokenAmount] = useState(0);
 	const [currency, setCurrency] = useState("TON");
+	const handleDeposit = useHandleDeposit();
 
 	const handleAmountChange = (e) => {
 		const tempNairaAmount = e.target.value;
@@ -204,7 +207,7 @@ const TopUpForm = (props) => {
 						  })
 						: handleSubmit(validateBetUser)
 				}
-				// onSubmit={handleSubmit(() => handleSendTon(0.1))}
+				// onSubmit={handleSubmit(() => handleDeposit(0.1))}
 			>
 				<VStack width={"full"} gap={"20px"}>
 					<FormControl>
