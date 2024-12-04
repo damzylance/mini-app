@@ -10,6 +10,7 @@ export const pollTransactionHash = async (
 	const params = {
 		address,
 		limit: 10,
+		archival: true,
 		api_key: "4a34b283d94ab208d77e422550fa92540e06600875319c115bc0ef05bf8e4a22",
 	};
 
