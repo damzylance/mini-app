@@ -21,10 +21,17 @@ import groupLeft from "../assets/images/group_left.png";
 import groupRight from "../assets/images/group_right.png";
 import axios from "axios";
 import { UtilityDrawer } from "./UtilityModal";
+import TransactionHistory from "./History/History";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const Landing = () => {
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const {
+		isOpen: historyIsOpen,
+		onOpen: historyOnOpen,
+		onClose: historyOnClose,
+	} = useDisclosure();
 
 	const [tg, setTg] = useState(null);
 	const address = useTonAddress();
@@ -44,12 +51,11 @@ const Landing = () => {
 		if (address) {
 			try {
 				const response = await axios.get(
-					`https://testnet.toncenter.com/api/v2/getAddressInformation`,
+					`https://toncenter.com/api/v2/getAddressInformation`,
 					{
 						params: {
 							address: address,
-							api_key:
-								"4a34b283d94ab208d77e422550fa92540e06600875319c115bc0ef05bf8e4a22",
+							api_key: `${import.meta.env.VITE_TON_API}`,
 						},
 					}
 				);
@@ -167,8 +173,20 @@ const Landing = () => {
 						</Select>
 					</HStack>
 				</HStack>
-
-				<TonConnectButton />
+				<HStack width={"full"} justifyContent={"space-between"}>
+					<TonConnectButton />
+					{address && (
+						<HStack
+							onClick={() => {
+								historyOnOpen();
+							}}
+							color={"#fff"}
+						>
+							<Text>History</Text>
+							<FaArrowRightLong />
+						</HStack>
+					)}
+				</HStack>
 
 				<Button
 					width="full"
@@ -219,6 +237,8 @@ const Landing = () => {
 				loading="lazy"
 				alt=""
 			/>
+			<TransactionHistory isOpen={historyIsOpen} onClose={historyOnClose} />
+
 			<UtilityDrawer
 				isOpen={isOpen}
 				onClose={() => {

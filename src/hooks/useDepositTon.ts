@@ -1,4 +1,4 @@
-import { beginCell } from "@ton/core";
+import { beginCell, Address, toNano } from "@ton/core";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 
 export const useHandleDeposit = () => {
@@ -38,3 +38,5 @@ export const useHandleDeposit = () => {
 		}
 	};
 };
+
+// TransferNotification Method ID

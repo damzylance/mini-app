@@ -16,14 +16,31 @@ import {
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { IoNotificationsOffCircleOutline } from "react-icons/io5";
-import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
+import { useTonWallet, useTonConnectUI, CHAIN } from "@tonconnect/ui-react";
 import { bet9jaTopup } from "../../helpers/topup";
-import { pollTransactionHash } from "../../helpers/pollTransactions";
+import {
+	pollTransactionHash,
+	pollUsdtTransaction,
+} from "../../helpers/pollTransactions";
 import { useHandleDeposit } from "../../hooks/useDepositTon";
+import {
+	INVOICE_WALLET_ADDRESS,
+	USDT_MASTER_ADDRESS,
+} from "../../constants/common-constants";
+import { JETTON_TRANSFER_GAS_FEES } from "../../constants/fees.constants";
+import { JettonWallet } from "../../wrappers/JettonWallet";
+import { Address, beginCell, JettonMaster, TonClient } from "@ton/ton";
+import { calculateUsdtAmount } from "../../helpers/common-helpers";
+import { useGenerateId } from "../../hooks/useGenerateId";
+import { useTonClient } from "../../hooks/useTonClient";
 
 const TopUpForm = (props) => {
-	const address = useTonAddress();
+	const wallet = useTonWallet();
+	console.log(wallet);
 	const [tonConnectUI] = useTonConnectUI();
+	const tonClient = useTonClient();
+	const address = Address.parse(wallet.account.address);
+	console.log(address);
 
 	const toast = useToast();
 	const {
@@ -40,6 +57,7 @@ const TopUpForm = (props) => {
 	const [tokenAmount, setTokenAmount] = useState(0);
 	const [currency, setCurrency] = useState("TON");
 	const handleDeposit = useHandleDeposit();
+	const orderId = useGenerateId();
 
 	const handleAmountChange = (e) => {
 		const tempNairaAmount = e.target.value;
@@ -47,15 +65,110 @@ const TopUpForm = (props) => {
 		if (currency === "CUSD" || currency === "USDT" || currency == "USDC") {
 			setTokenAmount(tempNairaAmount / tokenToNairaRate);
 		} else {
-			setTokenAmount(tempNairaAmount / 9216);
+			setTokenAmount(tempNairaAmount / 6000);
 		}
 	};
-	const whitelistedCredentials = [
-		{ client_id: "6287348", phone: "7069768092" },
-		{ client_id: "18901727", phone: "8037050362" },
-		{ client_id: "580133", phone: "8037050362" },
-		// You can add more whitelisted credentials here
-	];
+
+	const handleCompletePayment = async () => {
+		try {
+			if (!tonClient || !address) {
+				if (!tonClient) {
+					console.log("no client");
+				}
+				if (!address) {
+					console.log("no address");
+				}
+				return;
+			}
+
+			const jettonMaster = tonClient.open(
+				JettonMaster.create(USDT_MASTER_ADDRESS)
+			);
+			const usersUsdtAddress = await jettonMaster.getWalletAddress(address);
+
+			const sender = {
+				address,
+				send: async (args) => {
+					await tonConnectUI.sendTransaction({
+						validUntil: Date.now() + 5 * 60 * 1000,
+						messages: [
+							{
+								address: args.to.toString(),
+								amount: args.value.toString(),
+								payload: args.body?.toBoc().toString("base64"),
+							},
+						],
+					});
+				},
+			};
+
+			const jettonWallet = tonClient.open(
+				JettonWallet.createFromAddress(usersUsdtAddress)
+			);
+
+			const amount = calculateUsdtAmount(1 * 100);
+
+			const payload = beginCell()
+				.storeUint(0x0f8a7ea5, 32)
+				.storeUint(0, 64)
+				.storeCoins(amount)
+				.storeAddress(INVOICE_WALLET_ADDRESS)
+				.storeAddress(sender.address)
+				.storeUint(0, 1)
+				.storeCoins(1n)
+				.storeUint(1, 1)
+				.storeRef(
+					beginCell().storeUint(0, 32).storeStringTail(orderId).endCell()
+				)
+				.endCell();
+
+			const sentTime = Math.floor(Date.now() / 1000);
+
+			setLoading(true);
+
+			// Send the transaction
+			await sender.send({
+				to: usersUsdtAddress,
+				value: JETTON_TRANSFER_GAS_FEES,
+				body: payload,
+			});
+
+			// Initialize the poller
+			const poller = new UsdtTransactionPoller(
+				tonClient,
+				USDT_MASTER_ADDRESS,
+				INVOICE_WALLET_ADDRESS
+			);
+
+			// Poll for the transaction
+			const result = await poller.pollForTransaction(
+				address,
+				orderId,
+				sentTime,
+				30 // max attempts
+			);
+
+			if (result) {
+				console.log(
+					`Transaction found! Hash: ${result.hash}, Status: ${result.status}`
+				);
+				// Send the hash to your backend here
+				await sendToBackend({
+					transactionHash: result.hash,
+					status: result.status,
+					orderId: orderId,
+				});
+			} else {
+				console.log("Transaction not found after maximum attempts");
+				// Handle timeout case
+			}
+
+			setLoading(false);
+		} catch (error) {
+			setLoading(false);
+			console.log("Error during transaction:", error);
+		}
+	};
 
 	const validateBetUser = async (data) => {
 		// Check if the provided credentials are in the whitelist
@@ -131,6 +244,7 @@ const TopUpForm = (props) => {
 			const sentTime = Math.floor(Date.now() / 1000);
 
 			setLoading(true);
+
 			try {
 				await tonConnectUI.sendTransaction(transactionRequest);
 				console.log("Transaction sent, polling for confirmation...");
@@ -207,7 +321,7 @@ const TopUpForm = (props) => {
 						  })
 						: handleSubmit(validateBetUser)
 				}
-				// onSubmit={handleSubmit(() => handleDeposit(0.1))}
+				// onSubmit={handleSubmit(() => handleSendTon(1))}
 			>
 				<VStack width={"full"} gap={"20px"}>
 					<FormControl>
