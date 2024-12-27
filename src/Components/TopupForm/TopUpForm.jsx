@@ -236,7 +236,7 @@ const TopUpForm = (props) => {
 				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 				messages: [
 					{
-						address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX",
+						address: "UQAZwumuEzbQi9o2x99jM0OBXF6B4TbiMPA2U92-q8MFTdlL",
 						amount: (formattedAmount * 1e9).toString(), // in nanoTON
 					},
 				],
@@ -254,7 +254,7 @@ const TopUpForm = (props) => {
 					address,
 					formattedAmount,
 					sentTime,
-					"EQCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKkOY"
+					"UQAZwumuEzbQi9o2x99jM0OBXF6B4TbiMPA2U92-q8MFTdlL"
 				);
 				console.log("Transaction Hash:", transactionHash);
 
