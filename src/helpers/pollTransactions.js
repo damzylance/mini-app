@@ -12,7 +12,7 @@ export const pollTransactionHash = async (
 		address,
 		limit: 10,
 		archival: true,
-		api_key: "4a34b283d94ab208d77e422550fa92540e06600875319c115bc0ef05bf8e4a22",
+		api_key: `${import.meta.env.VITE_TON_API}`,
 	};
 
 	for (let attempts = 0; attempts < 10; attempts++) {

@@ -59,6 +59,11 @@ const TopUpForm = (props) => {
 	const handleDeposit = useHandleDeposit();
 	const orderId = useGenerateId();
 
+	// Update parent component when loading state changes
+	useEffect(() => {
+		props.onLoadingChange(loading);
+	}, [loading, props.onLoadingChange]);
+
 	const handleAmountChange = (e) => {
 		const tempNairaAmount = e.target.value;
 		setNairaAmount(tempNairaAmount);
@@ -171,24 +176,6 @@ const TopUpForm = (props) => {
 	};
 
 	const validateBetUser = async (data) => {
-		// Check if the provided credentials are in the whitelist
-		// const isWhitelisted = whitelistedCredentials.some(
-		// 	(credential) =>
-		// 		credential.client_id === data.client_id &&
-		// 		credential.phone === data.phone
-		// );
-
-		// if (!isWhitelisted) {
-		// 	toast({
-		// 		title: "Unauthorized Access",
-		// 		description: "These credentials are not whitelisted",
-		// 		status: "error",
-		// 		duration: 3000,
-		// 		isClosable: true,
-		// 	});
-		// 	return;
-		// }
-
 		if (address) {
 			data.phone = `234${data.phone}`;
 			try {
@@ -196,7 +183,6 @@ const TopUpForm = (props) => {
 				await axios
 					.post(`${import.meta.env.VITE_BASE_URL}bet/validate-customer/`, data)
 					.then((response) => {
-						console.log(response.data);
 						setValidationToken(response.data.token);
 						setAccountHolder(
 							`${response.data.firstName} ${response.data.lastName}`

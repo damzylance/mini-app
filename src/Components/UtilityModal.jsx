@@ -4,17 +4,25 @@ import {
 	DrawerCloseButton,
 	DrawerContent,
 	DrawerOverlay,
-	Text,
 	VStack,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import TopUpForm from "./TopupForm/TopUpForm";
 
 export const UtilityDrawer = (props) => {
+	const [isFormLoading, setIsFormLoading] = useState(false);
+
+	const handleClose = () => {
+		if (!isFormLoading) {
+			props.onClose();
+		}
+	};
+
 	return (
 		<Drawer
-			closeOnOverlayClick={false}
+			closeOnOverlayClick={!isFormLoading}
 			isOpen={props.isOpen}
-			onClose={props.onClose}
+			onClose={handleClose}
 			placement={"bottom"}
 		>
 			<DrawerOverlay zIndex={"900 !important"} />
@@ -24,10 +32,15 @@ export const UtilityDrawer = (props) => {
 				color={"#fff"}
 				bg={"#272A2F"}
 			>
-				<DrawerCloseButton />
+				<DrawerCloseButton isDisabled={isFormLoading} />
 				<DrawerBody>
 					<VStack width={"full"}>
-						<TopUpForm telco={""} onClose={props.onClose} name={""} />
+						<TopUpForm
+							telco={""}
+							onClose={props.onClose}
+							name={""}
+							onLoadingChange={setIsFormLoading}
+						/>
 					</VStack>
 				</DrawerBody>
 			</DrawerContent>
