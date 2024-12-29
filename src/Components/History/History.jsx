@@ -12,7 +12,6 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import TransactionRow from "./TransactionRow";
-import { useTonWallet } from "@tonconnect/ui-react";
 import { Address } from "@ton/core";
 
 const TransactionList = ({ transactions }) => {
@@ -38,24 +37,22 @@ const TransactionList = ({ transactions }) => {
 	);
 };
 
-const TransactionHistory = ({ isOpen, onClose }) => {
+const TransactionHistory = ({ isOpen, onClose, address }) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [transactions, setTransactions] = useState([]);
-	const wallet = useTonWallet();
-	const walletAddress = wallet ? Address.parse(wallet.account.address) : null;
 
 	useEffect(() => {
 		const fetchTransactions = async () => {
-			if (!walletAddress) {
+			if (!address) {
 				setIsLoading(false);
 				return;
 			}
-
+			const parsedAddress = Address.parse(address).toString();
 			try {
 				const response = await axios.get(
 					`${
 						import.meta.env.VITE_BASE_URL
-					}transactions/?search=${walletAddress}&limit=15`
+					}transactions/?search=${parsedAddress}&limit=15`
 				);
 				setTransactions(response.data.results);
 			} catch (error) {
@@ -66,7 +63,7 @@ const TransactionHistory = ({ isOpen, onClose }) => {
 		};
 
 		fetchTransactions();
-	}, [walletAddress]);
+	}, [address]);
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} size="lg">

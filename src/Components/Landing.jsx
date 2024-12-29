@@ -70,51 +70,51 @@ const Landing = () => {
 		}
 	};
 
-	const transactionRequest = {
-		validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
-		messages: [
-			{
-				address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-				amount: "100000000", // in nanoTON
-				// payload: "", // Optional: add payload if required
-				// state_init: null, // Optional: include if deploying a contract
-			},
-		],
-	};
+	// const transactionRequest = {
+	// 	validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+	// 	messages: [
+	// 		{
+	// 			address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
+	// 			amount: "100000000", // in nanoTON
+	// 			// payload: "", // Optional: add payload if required
+	// 			// state_init: null, // Optional: include if deploying a contract
+	// 		},
+	// 	],
+	// };
 
-	const handleSendTon = async () => {
-		const transactionRequest = {
-			validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
-			messages: [
-				{
-					address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-					amount: (0.1 * 1e9).toString(), // in nanoTON
-					// payload: "", // Optional: add payload if required
-					// state_init: null, // Optional: include if deploying a contract
-				},
-			],
-		};
-		try {
-			const txHash = await tonConnectUI.sendTransaction(transactionRequest);
-			console.log(txHash);
-			toast({
-				title: "Transaction Sent",
-				description: "Your Bet9ja top-up was successful.",
-				status: "success",
-				duration: 3000,
-				isClosable: true,
-			});
-		} catch (error) {
-			console.error("Error sending transaction:", error);
-			toast({
-				title: "Transaction Failed",
-				description: error.message || "An error occurred while sending TON.",
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		}
-	};
+	// const handleSendTon = async () => {
+	// 	const transactionRequest = {
+	// 		validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+	// 		messages: [
+	// 			{
+	// 				address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
+	// 				amount: (0.1 * 1e9).toString(), // in nanoTON
+	// 				// payload: "", // Optional: add payload if required
+	// 				// state_init: null, // Optional: include if deploying a contract
+	// 			},
+	// 		],
+	// 	};
+	// 	try {
+	// 		const txHash = await tonConnectUI.sendTransaction(transactionRequest);
+	// 		console.log(txHash);
+	// 		toast({
+	// 			title: "Transaction Sent",
+	// 			description: "Your Bet9ja top-up was successful.",
+	// 			status: "success",
+	// 			duration: 3000,
+	// 			isClosable: true,
+	// 		});
+	// 	} catch (error) {
+	// 		console.error("Error sending transaction:", error);
+	// 		toast({
+	// 			title: "Transaction Failed",
+	// 			description: error.message || "An error occurred while sending TON.",
+	// 			status: "error",
+	// 			duration: 3000,
+	// 			isClosable: true,
+	// 		});
+	// 	}
+	// };
 
 	useEffect(() => {
 		fetchTonBalance();
@@ -237,7 +237,11 @@ const Landing = () => {
 				loading="lazy"
 				alt=""
 			/>
-			<TransactionHistory isOpen={historyIsOpen} onClose={historyOnClose} />
+			<TransactionHistory
+				address={address}
+				isOpen={historyIsOpen}
+				onClose={historyOnClose}
+			/>
 
 			<UtilityDrawer
 				isOpen={isOpen}

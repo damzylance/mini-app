@@ -40,6 +40,7 @@ export const UtilityDrawer = (props) => {
 							onClose={props.onClose}
 							name={""}
 							onLoadingChange={setIsFormLoading}
+							address={props.address}
 						/>
 					</VStack>
 				</DrawerBody>
