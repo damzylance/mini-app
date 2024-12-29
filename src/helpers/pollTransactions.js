@@ -15,33 +15,75 @@ export const pollTransactionHash = async (
 		api_key: `${import.meta.env.VITE_TON_API}`,
 	};
 
+	// Convert targetAmount to nanotons
+	const targetAmountNano = Math.round(targetAmount * 1e9);
+
+	// Normalize the destination address
+	const normalizedTargetAddress = destinationAddress
+		.toString()
+		.replace(/[^a-zA-Z0-9]/g, "");
+
 	for (let attempts = 0; attempts < 10; attempts++) {
-		const response = await axios.get(apiUrl, { params });
-		const transactions = response.data.result;
+		console.log(`Polling attempt ${attempts + 1}/10`);
 
-		// Find the transaction with matching criteria
-		for (const tx of transactions) {
-			// Check the transaction time
-			if (tx.utime < sentTime) continue;
+		try {
+			const response = await axios.get(apiUrl, { params });
+			const transactions = response.data.result;
 
-			// Look for a matching `out_msg`
-			const matchingOutMsg = tx.out_msgs.find(
-				(msg) =>
-					msg.destination === destinationAddress &&
-					parseInt(msg.value || "0", 10) === Math.round(targetAmount * 1e9)
-			);
+			for (const tx of transactions) {
+				// Check if transaction is newer than sent time
+				const isAfterSentTime = parseInt(tx.utime) >= parseInt(sentTime);
 
-			if (matchingOutMsg) {
-				// Return the transaction hash
-				return tx.transaction_id.hash;
+				if (!isAfterSentTime) {
+					console.log(
+						`Skipping older transaction from ${tx.utime} (sent at ${sentTime})`
+					);
+					continue;
+				}
+
+				if (tx.out_msgs && tx.out_msgs.length > 0) {
+					for (const msg of tx.out_msgs) {
+						// Normalize the transaction destination address
+						const normalizedTxAddress = msg.destination
+							.toString()
+							.replace(/[^a-zA-Z0-9]/g, "");
+
+						const isDestinationMatch =
+							normalizedTxAddress === normalizedTargetAddress;
+						const isAmountMatch = msg.value === targetAmountNano.toString();
+
+						console.log(
+							`Checking transaction ${tx.transaction_id.hash}:
+              Time: ${tx.utime} (${new Date(tx.utime * 1000).toISOString()})
+              Sent Time: ${sentTime} (${new Date(
+								sentTime * 1000
+							).toISOString()})
+              Is After Sent Time: ${isAfterSentTime}
+              Destination (normalized): ${normalizedTxAddress}
+              Expected (normalized): ${normalizedTargetAddress}
+              Amount: ${msg.value}
+              Expected: ${targetAmountNano}
+              Matches Destination: ${isDestinationMatch}
+              Matches Amount: ${isAmountMatch}`
+						);
+
+						if (isDestinationMatch && isAmountMatch && isAfterSentTime) {
+							console.log(`Match found! Hash: ${tx.transaction_id.hash}`);
+							return tx.transaction_id.hash;
+						}
+					}
+				}
 			}
-		}
 
-		// Wait before retrying
-		await new Promise((resolve) => setTimeout(resolve, 5000));
+			console.log("No matching transaction found, waiting 7 seconds...");
+			await new Promise((resolve) => setTimeout(resolve, 7000));
+		} catch (error) {
+			console.error("Error polling for transaction:", error);
+			await new Promise((resolve) => setTimeout(resolve, 7000));
+		}
 	}
 
-	throw new Error("Transaction not confirmed in time.");
+	throw new Error("Transaction not confirmed within the timeout period.");
 };
 
 function parseUsdtPayload(tx) {

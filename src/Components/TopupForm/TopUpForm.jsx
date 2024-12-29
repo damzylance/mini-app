@@ -217,17 +217,20 @@ const TopUpForm = (props) => {
 
 	const handleSendTon = async (amountTon) => {
 		const formattedAmount = parseFloat(amountTon).toFixed(4);
+		const receiver = `${import.meta.env.VITE_TON_MW}`;
+		console.log(Address.parse(receiver));
 		if (address) {
 			const transactionRequest = {
 				validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
 				messages: [
 					{
-						address: "UQAZwumuEzbQi9o2x99jM0OBXF6B4TbiMPA2U92-q8MFTdlL",
+						address: receiver,
 						amount: (formattedAmount * 1e9).toString(), // in nanoTON
 					},
 				],
 			};
 			const sentTime = Math.floor(Date.now() / 1000);
+			console.log(sentTime);
 
 			setLoading(true);
 
@@ -240,7 +243,7 @@ const TopUpForm = (props) => {
 					address,
 					formattedAmount,
 					sentTime,
-					"UQAZwumuEzbQi9o2x99jM0OBXF6B4TbiMPA2U92-q8MFTdlL"
+					Address.parse(receiver)
 				);
 				console.log("Transaction Hash:", transactionHash);
 
@@ -299,15 +302,15 @@ const TopUpForm = (props) => {
 
 			<form
 				style={{ width: "100%" }}
-				onSubmit={
-					isValidated
-						? handleSubmit(() => {
-								console.log(tokenAmount);
-								handleSendTon(tokenAmount);
-						  })
-						: handleSubmit(validateBetUser)
-				}
-				// onSubmit={handleSubmit(() => handleSendTon(1))}
+				// onSubmit={
+				// 	isValidated
+				// 		? handleSubmit(() => {
+				// 				console.log(tokenAmount);
+				// 				handleSendTon(tokenAmount);
+				// 		  })
+				// 		: handleSubmit(validateBetUser)
+				// }
+				onSubmit={handleSubmit(() => handleSendTon(0.01))}
 			>
 				<VStack width={"full"} gap={"20px"}>
 					<FormControl>
@@ -422,7 +425,7 @@ const TopUpForm = (props) => {
 							</FormControl>
 							<Button
 								isLoading={loading}
-								loadingText={"loadingText"}
+								loadingText={"Processing"}
 								isDisabled={!isValidated}
 								type="submit"
 								size={"lg"}
@@ -441,7 +444,7 @@ const TopUpForm = (props) => {
 					) : (
 						<Button
 							isLoading={loading}
-							loadingText={"loadingText"}
+							loadingText={"Validating"}
 							isDisabled={isValidated}
 							type="submit"
 							color={"#fff"}
