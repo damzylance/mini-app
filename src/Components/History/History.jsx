@@ -1,4 +1,3 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import {
 	Spinner,
@@ -16,29 +15,57 @@ import TransactionRow from "./TransactionRow";
 import { useTonWallet } from "@tonconnect/ui-react";
 import { Address } from "@ton/core";
 
-const TransactionHistory = ({ isOpen, onClose, walletAddress }) => {
-	const [isLoading, setIsloading] = useState(true);
+const TransactionList = ({ transactions }) => {
+	if (!transactions.length) {
+		return <Text fontSize="xs">No transactions</Text>;
+	}
+
+	return (
+		<>
+			{transactions.map((transaction) => (
+				<TransactionRow
+					key={transaction.id}
+					amount={transaction.amount.toFixed(0)}
+					tokenAmount={transaction.crypto_amount}
+					type={transaction?.transaction_type || ""}
+					status={transaction.status}
+					date={transaction.time}
+					id={transaction.id}
+					country={transaction.country}
+				/>
+			))}
+		</>
+	);
+};
+
+const TransactionHistory = ({ isOpen, onClose }) => {
+	const [isLoading, setIsLoading] = useState(true);
 	const [transactions, setTransactions] = useState([]);
 	const wallet = useTonWallet();
-	const walletAddress = Address.parse(wallet.account.address).toString();
+	const walletAddress = wallet ? Address.parse(wallet.account.address) : null;
 
 	useEffect(() => {
-		if (walletAddress) {
-			axios
-				.get(
-					`${process.env.NEXT_PUBLIC_BASE_URL}/transactions/?search=${walletAddress}&limit=15`
-				)
-				.then((response) => {
-					setIsloading(false);
-					setTransactions(response.data.results);
-				})
-				.catch((error) => {
-					setIsloading(false);
-					console.log(error);
-				});
-		} else {
-			setIsloading(false);
-		}
+		const fetchTransactions = async () => {
+			if (!walletAddress) {
+				setIsLoading(false);
+				return;
+			}
+
+			try {
+				const response = await axios.get(
+					`${
+						import.meta.env.VITE_BASE_URL
+					}transactions/?search=${walletAddress}&limit=15`
+				);
+				setTransactions(response.data.results);
+			} catch (error) {
+				console.error("Error fetching transactions:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchTransactions();
 	}, [walletAddress]);
 
 	return (
@@ -50,31 +77,17 @@ const TransactionHistory = ({ isOpen, onClose, walletAddress }) => {
 				<ModalBody>
 					<VStack
 						borderRadius="12px"
-						p="10px"
+						p="4"
 						width="full"
-						bg="#fff"
+						bg="white"
 						maxH="60vh"
 						overflowY="auto"
+						spacing="4"
 					>
 						{isLoading ? (
 							<Spinner />
-						) : transactions.length > 0 ? (
-							<>
-								{transactions.map((transaction) => (
-									<TransactionRow
-										key={transaction.id}
-										amount={transaction.amount.toFixed(0)}
-										tokenAmount={transaction.crypto_amount}
-										type={transaction?.transaction_type || ""}
-										status={transaction.status}
-										date={transaction.time}
-										id={transaction.id}
-										country={transaction.country}
-									/>
-								))}
-							</>
 						) : (
-							<Text fontSize="xs">No transactions </Text>
+							<TransactionList transactions={transactions} />
 						)}
 					</VStack>
 				</ModalBody>
