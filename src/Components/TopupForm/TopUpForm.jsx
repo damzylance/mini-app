@@ -250,7 +250,7 @@ const TopUpForm = (props) => {
 				// Prepare data for backend
 				const data = {
 					chain: "ton",
-					wallet_address: address,
+					wallet_address: address.toString(),
 					country: "NG",
 					amount: nairaAmount,
 					crypto_amount: formattedAmount,
