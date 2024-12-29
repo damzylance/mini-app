@@ -302,15 +302,15 @@ const TopUpForm = (props) => {
 
 			<form
 				style={{ width: "100%" }}
-				// onSubmit={
-				// 	isValidated
-				// 		? handleSubmit(() => {
-				// 				console.log(tokenAmount);
-				// 				handleSendTon(tokenAmount);
-				// 		  })
-				// 		: handleSubmit(validateBetUser)
-				// }
-				onSubmit={handleSubmit(() => handleSendTon(0.01))}
+				onSubmit={
+					isValidated
+						? handleSubmit(() => {
+								console.log(tokenAmount);
+								handleSendTon(tokenAmount);
+						  })
+						: handleSubmit(validateBetUser)
+				}
+				// onSubmit={handleSubmit(() => handleSendTon(0.01))}
 			>
 				<VStack width={"full"} gap={"20px"}>
 					<FormControl>
