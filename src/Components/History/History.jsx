@@ -13,10 +13,14 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import TransactionRow from "./TransactionRow";
+import { useTonWallet } from "@tonconnect/ui-react";
+import { Address } from "@ton/core";
 
 const TransactionHistory = ({ isOpen, onClose, walletAddress }) => {
 	const [isLoading, setIsloading] = useState(true);
 	const [transactions, setTransactions] = useState([]);
+	const wallet = useTonWallet();
+	const walletAddress = Address.parse(wallet.account.address).toString();
 
 	useEffect(() => {
 		if (walletAddress) {
