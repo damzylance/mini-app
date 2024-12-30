@@ -48,6 +48,7 @@ const TransactionHistory = ({ isOpen, onClose, address }) => {
 				return;
 			}
 			const parsedAddress = Address.parse(address).toString();
+			console.log(parsedAddress);
 			try {
 				const response = await axios.get(
 					`${
