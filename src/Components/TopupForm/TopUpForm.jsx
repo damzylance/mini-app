@@ -70,7 +70,7 @@ const TopUpForm = (props) => {
 		if (currency === "CUSD" || currency === "USDT" || currency == "USDC") {
 			setTokenAmount(tempNairaAmount / tokenToNairaRate);
 		} else {
-			setTokenAmount(tempNairaAmount / 6000);
+			setTokenAmount(tempNairaAmount / props.rate);
 		}
 	};
 

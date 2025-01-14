@@ -36,6 +36,8 @@ export const UtilityDrawer = (props) => {
 				<DrawerBody>
 					<VStack width={"full"}>
 						<TopUpForm
+							rateLoading={props.rateLoding}
+							rate={props.rate}
 							telco={""}
 							onClose={props.onClose}
 							name={""}

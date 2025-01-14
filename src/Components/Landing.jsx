@@ -37,6 +37,9 @@ const Landing = () => {
 	const address = useTonAddress();
 	const [tonConnectUI] = useTonConnectUI();
 	const [balance, setBalance] = useState(0);
+	const [rate, setRate] = useState(0);
+	const [rateLoading, setRateLoading] = useState(true);
+
 	// Initialize Telegram WebApp
 	useEffect(() => {
 		if (window.Telegram?.WebApp) {
@@ -59,66 +62,48 @@ const Landing = () => {
 						},
 					}
 				);
-				// Balance is returned in nanoTON (1 TON = 10^9 nanoTON)
 				const balanceNanoTon = response.data.result.balance;
-				const balanceTon = balanceNanoTon / 1e9; // Convert to TON
+				const balanceTon = balanceNanoTon / 1e9;
 				setBalance(balanceTon);
 			} catch (error) {
 				console.error("Error fetching TON balance:", error);
-				return 0; // Return 0 if there's an error
 			}
 		}
 	};
 
-	// const transactionRequest = {
-	// 	validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
-	// 	messages: [
-	// 		{
-	// 			address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-	// 			amount: "100000000", // in nanoTON
-	// 			// payload: "", // Optional: add payload if required
-	// 			// state_init: null, // Optional: include if deploying a contract
-	// 		},
-	// 	],
-	// };
-
-	// const handleSendTon = async () => {
-	// 	const transactionRequest = {
-	// 		validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
-	// 		messages: [
-	// 			{
-	// 				address: "0QCpvCoYE9WRETYCHgnVXU_dBZCmO3t7KTU7zleKLkVAKqXX", // Verify this address
-	// 				amount: (0.1 * 1e9).toString(), // in nanoTON
-	// 				// payload: "", // Optional: add payload if required
-	// 				// state_init: null, // Optional: include if deploying a contract
-	// 			},
-	// 		],
-	// 	};
-	// 	try {
-	// 		const txHash = await tonConnectUI.sendTransaction(transactionRequest);
-	// 		console.log(txHash);
-	// 		toast({
-	// 			title: "Transaction Sent",
-	// 			description: "Your Bet9ja top-up was successful.",
-	// 			status: "success",
-	// 			duration: 3000,
-	// 			isClosable: true,
-	// 		});
-	// 	} catch (error) {
-	// 		console.error("Error sending transaction:", error);
-	// 		toast({
-	// 			title: "Transaction Failed",
-	// 			description: error.message || "An error occurred while sending TON.",
-	// 			status: "error",
-	// 			duration: 3000,
-	// 			isClosable: true,
-	// 		});
-	// 	}
-	// };
+	const fetchRate = async () => {
+		setRateLoading(true);
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_UTIL_URL}swap/naira/ton`
+			); // Replace with your API endpoint
+			// console.log(response.data);
+			setRate(response.data);
+		} catch (error) {
+			console.error("Error fetching rate:", error);
+			toast({
+				title: "Error fetching rate",
+				description:
+					error.message || "An error occurred while fetching the rate.",
+				status: "error",
+				duration: 3000,
+				isClosable: true,
+			});
+		} finally {
+			setRateLoading(false);
+		}
+	};
 
 	useEffect(() => {
 		fetchTonBalance();
 	}, [address]);
+
+	useEffect(() => {
+		fetchRate(); // Fetch rate initially
+		const interval = setInterval(fetchRate, 3 * 60 * 1000); // Fetch rate every 3 minutes
+		return () => clearInterval(interval); // Cleanup interval on unmount
+	}, []);
+
 	return (
 		<VStack
 			width="full"
@@ -157,7 +142,7 @@ const Landing = () => {
 					<VStack alignItems="flex-start">
 						<Text fontSize="12px">Your Current Balance</Text>
 						<Text fontSize="30px" fontWeight="500">
-							₦{(balance * 9216).toFixed(2)}
+							₦{(balance * rate).toFixed(2)}
 						</Text>
 					</VStack>
 					<HStack>
@@ -248,6 +233,8 @@ const Landing = () => {
 				onClose={() => {
 					onClose();
 				}}
+				rate={rate}
+				rateLoading={rateLoading}
 			/>
 		</VStack>
 	);
