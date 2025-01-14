@@ -64,6 +64,10 @@ const TopUpForm = (props) => {
 		props.onLoadingChange(loading);
 	}, [loading, props.onLoadingChange]);
 
+	useEffect(() => {
+		console.log(props.rate);
+	}, [props.rate]);
+
 	const handleAmountChange = (e) => {
 		const tempNairaAmount = e.target.value;
 		setNairaAmount(tempNairaAmount);
