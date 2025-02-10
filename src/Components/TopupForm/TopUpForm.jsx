@@ -6,9 +6,11 @@ import {
 	FormErrorMessage,
 	FormLabel,
 	HStack,
+	Image,
 	Input,
 	InputGroup,
 	InputLeftAddon,
+	Link,
 	Text,
 	VStack,
 	useToast,
@@ -23,6 +25,8 @@ import {
 	pollUsdtTransaction,
 } from "../../helpers/pollTransactions";
 import { useHandleDeposit } from "../../hooks/useDepositTon";
+import successGif from "../../assets/images/success.gif";
+
 import {
 	INVOICE_WALLET_ADDRESS,
 	USDT_MASTER_ADDRESS,
@@ -56,6 +60,7 @@ const TopUpForm = (props) => {
 	const [nairaAmount, setNairaAmount] = useState(0);
 	const [tokenAmount, setTokenAmount] = useState(0);
 	const [currency, setCurrency] = useState("TON");
+	const [page, setPage] = useState("form");
 	const handleDeposit = useHandleDeposit();
 	const orderId = useGenerateId();
 
@@ -268,7 +273,8 @@ const TopUpForm = (props) => {
 				console.log("Purchase Response:", purchaseResponse);
 
 				if (purchaseResponse?.status === 200) {
-					toast({ title: "Transaction Successful", status: "success" });
+					toast({ title: "Top up Successful", status: "success" });
+					setPage("success");
 				} else {
 					throw new Error("Purchase failed");
 				}
@@ -277,7 +283,6 @@ const TopUpForm = (props) => {
 				toast({ title: "Error", description: error.message, status: "error" });
 			} finally {
 				setLoading(false);
-				props.onClose();
 			}
 		} else {
 			toast({
@@ -304,174 +309,203 @@ const TopUpForm = (props) => {
 				</HStack>
 			</HStack>
 
-			<form
-				style={{ width: "100%" }}
-				onSubmit={
-					isValidated
-						? handleSubmit(() => {
-								console.log(tokenAmount);
-								handleSendTon(tokenAmount);
-						  })
-						: handleSubmit(validateBetUser)
-				}
-				// onSubmit={handleSubmit(() => handleSendTon(0.01))}
-			>
-				<VStack width={"full"} gap={"20px"}>
-					<FormControl>
-						<FormLabel fontSize={"sm"}>Phone Number</FormLabel>
-						<InputGroup size={"md"}>
-							<InputLeftAddon color={"#000"}>{"+234"}</InputLeftAddon>
+			{page === "success" && (
+				<VStack width={"full"} gap={"20px"} mt={"40px"}>
+					<Text color={"#fff"}> Account top up successful </Text>
+					<Image src={successGif} />
+					<Link href="https://sports.bet9ja.com/">
+						{" "}
+						<Button
+							size={"lg"}
+							width={"full"}
+							borderRadius={"full"}
+							color={"#fff"}
+							bg="#0D7B3C"
+							_hover={{
+								background: "#0D7B3C",
+							}}
+							variant={"solid"}
+						>
+							Place Bet
+						</Button>
+					</Link>
+				</VStack>
+			)}
+			{page === "form" && (
+				<form
+					style={{ width: "100%" }}
+					onSubmit={
+						isValidated
+							? handleSubmit(() => {
+									console.log(tokenAmount);
+									handleSendTon(tokenAmount);
+							  })
+							: handleSubmit(validateBetUser)
+					}
+					// onSubmit={handleSubmit(() => handleSendTon(0.01))}
+				>
+					<VStack width={"full"} gap={"20px"}>
+						<FormControl>
+							<FormLabel fontSize={"sm"}>Phone Number</FormLabel>
+							<InputGroup size={"md"}>
+								<InputLeftAddon color={"#000"}>{"+234"}</InputLeftAddon>
+								<Input
+									fontSize={"16px"}
+									border={"1px solid #506DBB"}
+									outline={"none"}
+									isDisabled={isValidated}
+									type="number"
+									inputMode={"numeric"}
+									required
+									{...register("phone", {
+										minLength: {
+											value: 10,
+											message: "Account ID must be 10 digits",
+										},
+										maxLength: {
+											value: 10,
+											message: "Account ID must be 10 digits",
+										},
+									})}
+								/>
+							</InputGroup>
+							<HStack width={"fulll"} justifyContent={"flex-end"}>
+								<Text color={"red"} fontSize={"xs"}>
+									{errors.phone && errors.phone.message}
+								</Text>
+							</HStack>
+						</FormControl>
+						<FormControl>
+							<FormLabel fontSize={"sm"}>Bet9ja Account ID</FormLabel>
 							<Input
 								fontSize={"16px"}
 								border={"1px solid #506DBB"}
-								outline={"none"}
 								isDisabled={isValidated}
+								outline={"none"}
 								type="number"
 								inputMode={"numeric"}
 								required
-								{...register("phone", {
-									minLength: {
-										value: 10,
-										message: "Account ID must be 10 digits",
-									},
-									maxLength: {
-										value: 10,
-										message: "Account ID must be 10 digits",
-									},
-								})}
+								{...register(
+									"client_id"
+									// 	 {
+									// 	minLength: { value: 7, message: "Account ID must be 7 digits" },
+									// 	maxLength: { value: 7, message: "Account ID must be 7 digits" },
+									// }
+								)}
 							/>
-						</InputGroup>
-						<HStack width={"fulll"} justifyContent={"flex-end"}>
-							<Text color={"red"} fontSize={"xs"}>
-								{errors.phone && errors.phone.message}
-							</Text>
-						</HStack>
-					</FormControl>
-					<FormControl>
-						<FormLabel fontSize={"sm"}>Bet9ja Account ID</FormLabel>
-						<Input
-							fontSize={"16px"}
-							border={"1px solid #506DBB"}
-							isDisabled={isValidated}
-							outline={"none"}
-							type="number"
-							inputMode={"numeric"}
-							required
-							{...register(
-								"client_id"
-								// 	 {
-								// 	minLength: { value: 7, message: "Account ID must be 7 digits" },
-								// 	maxLength: { value: 7, message: "Account ID must be 7 digits" },
-								// }
-							)}
-						/>
-						<HStack width={"fulll"} justifyContent={"space-between"} mt={"4px"}>
-							<Text fontSize={"xs"}>{accountHolder}</Text>
-							<Text color={"red"} fontSize={"xs"}>
-								{errors.client_id && errors.client_id.message}
-							</Text>
-						</HStack>
-					</FormControl>
+							<HStack
+								width={"fulll"}
+								justifyContent={"space-between"}
+								mt={"4px"}
+							>
+								<Text fontSize={"xs"}>{accountHolder}</Text>
+								<Text color={"red"} fontSize={"xs"}>
+									{errors.client_id && errors.client_id.message}
+								</Text>
+							</HStack>
+						</FormControl>
 
-					{isValidated ? (
-						<>
-							<FormControl>
-								<HStack width={"full"} justifyContent={"space-between"}>
-									{" "}
-									<FormLabel fontSize={"sm"}>Amount (₦)</FormLabel>
-									{/* <Text fontSize={"xs"} color={"#000"}>
+						{isValidated ? (
+							<>
+								<FormControl>
+									<HStack width={"full"} justifyContent={"space-between"}>
+										{" "}
+										<FormLabel fontSize={"sm"}>Amount (₦)</FormLabel>
+										{/* <Text fontSize={"xs"} color={"#000"}>
 										Balance ({userCurrencyTicker}):{" "}
 										{(
 											parseFloat(tokenBalance) *
 											parseFloat(tokenToNairaRate.toString())
 										).toFixed(2)}
 									</Text> */}
-								</HStack>
+									</HStack>
 
-								<Input
-									border={"1px solid #506DBB"}
-									outline={"none"}
-									fontSize={"16px"}
-									type="number"
-									inputMode={"numeric"}
-									required
-									{...register("amount", {
-										onChange: handleAmountChange,
+									<Input
+										border={"1px solid #506DBB"}
+										outline={"none"}
+										fontSize={"16px"}
+										type="number"
+										inputMode={"numeric"}
+										required
+										{...register("amount", {
+											onChange: handleAmountChange,
 
-										// max: {
-										// 	value: parseFloat(tokenBalance) * tokenToNairaRate,
-										// 	message: "Insufficient balance",
-										// },
-										min: {
-											value: 100,
-											message: `Minimum recharge amount is ₦100`,
-										},
-									})}
-								/>
-								<HStack
-									width={"full"}
-									alignItems={"center"}
-									justifyContent={"space-between"}
-									mt={"5px"}
-								>
-									<Text fontSize={"xs"} textAlign={"right"}>
-										≈ {tokenAmount.toFixed(4)} {currency}
-										<br />
-									</Text>
-									<Text color={"red"} fontSize={"xx-small"}>
+											// max: {
+											// 	value: parseFloat(tokenBalance) * tokenToNairaRate,
+											// 	message: "Insufficient balance",
+											// },
+											min: {
+												value: 100,
+												message: `Minimum recharge amount is ₦100`,
+											},
+										})}
+									/>
+									<HStack
+										width={"full"}
+										alignItems={"center"}
+										justifyContent={"space-between"}
+										mt={"5px"}
+									>
+										<Text fontSize={"xs"} textAlign={"right"}>
+											≈ {tokenAmount.toFixed(4)} {currency}
+											<br />
+										</Text>
+										<Text color={"red"} fontSize={"xx-small"}>
+											{errors.amount && errors.amount.message}
+										</Text>
+									</HStack>
+
+									<FormErrorMessage>
 										{errors.amount && errors.amount.message}
-									</Text>
-								</HStack>
-
-								<FormErrorMessage>
-									{errors.amount && errors.amount.message}
-								</FormErrorMessage>
-							</FormControl>
+									</FormErrorMessage>
+								</FormControl>
+								<Button
+									isLoading={loading}
+									loadingText={"Processing"}
+									isDisabled={!isValidated}
+									type="submit"
+									size={"lg"}
+									width={"full"}
+									borderRadius={"full"}
+									color={"#fff"}
+									bg="#0D7B3C"
+									_hover={{
+										background: "#0D7B3C",
+									}}
+									variant={"solid"}
+								>
+									Topup
+								</Button>
+							</>
+						) : (
 							<Button
 								isLoading={loading}
-								loadingText={"Processing"}
-								isDisabled={!isValidated}
+								loadingText={"Validating"}
+								isDisabled={isValidated}
 								type="submit"
+								color={"#fff"}
 								size={"lg"}
 								width={"full"}
 								borderRadius={"full"}
-								color={"#fff"}
-								bg="#0D7B3C"
+								background={"#0D7B3C"}
 								_hover={{
 									background: "#0D7B3C",
 								}}
 								variant={"solid"}
 							>
-								Topup
+								Validate
 							</Button>
-						</>
-					) : (
-						<Button
-							isLoading={loading}
-							loadingText={"Validating"}
-							isDisabled={isValidated}
-							type="submit"
-							color={"#fff"}
-							size={"lg"}
-							width={"full"}
-							borderRadius={"full"}
-							background={"#0D7B3C"}
-							_hover={{
-								background: "#0D7B3C",
-							}}
-							variant={"solid"}
-						>
-							Validate
-						</Button>
-					)}
+						)}
 
-					<HStack fontSize={"sm"} fontWeight={400} color={"#fff"}>
-						{" "}
-						<IoNotificationsOffCircleOutline />{" "}
-						<Text>This may take up to 15 seconds</Text>{" "}
-					</HStack>
-				</VStack>
-			</form>
+						<HStack fontSize={"sm"} fontWeight={400} color={"#fff"}>
+							{" "}
+							<IoNotificationsOffCircleOutline />{" "}
+							<Text>This may take up to 15 seconds</Text>{" "}
+						</HStack>
+					</VStack>
+				</form>
+			)}
+
 			<Box width="full" height={"200px"}></Box>
 		</VStack>
 	);
